@@ -116,7 +116,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
 
   return (
     <Container>
-      <Title>Responding</Title>
+      <Title>Here is how you did</Title>
 
       {/* Facial Expressions */}
       <Section>
