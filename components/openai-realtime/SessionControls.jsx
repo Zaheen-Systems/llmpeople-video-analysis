@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CloudLightning, CloudOff, MessageSquare } from "react-feather";
+import { CloudLightning, CloudOff } from "react-feather";
 import styled from "styled-components";
 import Button from "./Button";
 
@@ -56,7 +56,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
         $isActive={isActivating}
         icon={<CloudLightning height={16} />}
       >
-        {isActivating ? "starting session..." : "start scenario 1"}
+        {isActivating ? "starting session..." : "Language Learning Coach"}
       </Button>
 
       <Button
@@ -67,7 +67,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
         $isActive={isActivating}
         icon={<CloudLightning height={16} />}
       >
-        {isActivating ? "starting session..." : "start scenario 2"}
+        {isActivating ? "starting session..." : "Sales Coach"}
       </Button>
 
       <Button
@@ -78,7 +78,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
         $isActive={isActivating}
         icon={<CloudLightning height={16} />}
       >
-        {isActivating ? "starting session..." : "start scenario 3"}
+        {isActivating ? "starting session..." : "Customer Service Coach"}
       </Button>
     </SessionStoppedContainer>
   );
@@ -94,29 +94,8 @@ function SessionActive({ stopSession, sendTextMessage, isRecording }) {
 
   return (
     <SessionActiveContainer>
-      <Input
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && message.trim()) {
-            handleSendClientEvent();
-          }
-        }}
-        type="text"
-        placeholder="send a text message..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <Button
-        onClick={() => {
-          if (message.trim()) {
-            handleSendClientEvent();
-          }
-        }}
-        icon={<MessageSquare height={16} />}
-      >
-        send text
-      </Button>
       <Button onClick={stopSession} icon={<CloudOff height={16} />}>
-        disconnect
+        Submit
       </Button>
     </SessionActiveContainer>
   );
