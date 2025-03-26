@@ -1,20 +1,11 @@
 import { useGameContext } from "@/components/GameContextProvider";
+import { Scenario1, Scenario2, scenario3 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { useEffect, useRef, useState } from "react";
 import SessionControls from "./SessionControls";
 
 export default function SessionApp({ mainStateDispatch }) {
-  // Define a fixed system message
-  const FIXED_SYSTEM_MESSAGE = `You are a customer service trainer representing the Mandai Wildlife Group. Your role is to coach and guide employees from Singapore Zoo, Bird Park, and Night Safari through a customer service role-play exercise. Start by asking the trainee which scenario they would like to role-play. The available scenarios are:
-
-    Managing Miscommunication or Misunderstandings
-    Dealing with an Angry Customer
-    Handling a VIP or High-Value Customer
-    Handling a Customer Who Wants to Speak to a Manager
-
-Once the trainee selects a scenario, simulate that scenario with realistic customer behavior. Engage the trainee by challenging them to respond effectively, then provide immediate, constructive feedback that highlights both strengths and areas for improvement. Your tone should be supportive, instructive, and aimed at helping the trainee develop effective communication, empathy, and problem-solving skills.`;
-
-  const [systemMessage, setSystemMessage] = useState(FIXED_SYSTEM_MESSAGE);
+  const [systemMessage, setSystemMessage] = useState(Scenario1);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [events, setEvents] = useState([]);
   const [dataChannel, setDataChannel] = useState(null);
@@ -24,15 +15,15 @@ Once the trainee selects a scenario, simulate that scenario with realistic custo
   const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
 
   const setScenario1 = () => {
-    setSystemMessage(FIXED_SYSTEM_MESSAGE);
+    setSystemMessage(Scenario1);
   };
 
   const setScenario2 = () => {
-    setSystemMessage(`you are a plumber and only know things about plumbing`);
+    setSystemMessage(Scenario2);
   };
 
   const setScenario3 = () => {
-    setSystemMessage(`you are a driver and only know things about driving`);
+    setSystemMessage(scenario3);
   };
 
   useEffect(() => {
