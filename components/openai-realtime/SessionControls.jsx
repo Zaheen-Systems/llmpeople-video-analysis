@@ -36,7 +36,7 @@ const SessionActiveContainer = styled.div`
   gap: 0.5rem;
 `;
 
-function SessionStopped({ startSession, scenario2, scenario3 }) {
+function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
   const [isActivating, setIsActivating] = useState(false);
 
   function handleStartSession() {
@@ -49,7 +49,10 @@ function SessionStopped({ startSession, scenario2, scenario3 }) {
   return (
     <SessionStoppedContainer>
       <Button
-        onClick={handleStartSession}
+        onClick={() => {
+          scenario1();
+          handleStartSession();
+        }}
         $isActive={isActivating}
         icon={<CloudLightning height={16} />}
       >
@@ -134,6 +137,7 @@ export default function SessionControls({
   sendTextMessage,
   serverEvents,
   isSessionActive,
+  scenario1,
   scenario2,
   scenario3,
   isRecording,
@@ -149,7 +153,12 @@ export default function SessionControls({
           isRecording={isRecording}
         />
       ) : (
-        <SessionStopped startSession={startSession} scenario2={scenario2} scenario3={scenario3} />
+        <SessionStopped
+          startSession={startSession}
+          scenario1={scenario1}
+          scenario2={scenario2}
+          scenario3={scenario3}
+        />
       )}
     </Container>
   );

@@ -25,6 +25,10 @@ Once the trainee selects a scenario, simulate that scenario with realistic custo
   const { respondingData, loading, uploadVideo } = useUploadVideo();
   const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
 
+  const setScenario1 = () => {
+    setSystemMessage(FIXED_SYSTEM_MESSAGE);
+  };
+
   const setScenario2 = () => {
     setSystemMessage(`you are a plumber and only know things about plumbing`);
   };
@@ -252,6 +256,7 @@ Once the trainee selects a scenario, simulate that scenario with realistic custo
             events={events}
             isSessionActive={isSessionActive}
             isRecording={isRecording}
+            scenario1={setScenario1}
             scenario2={setScenario2}
             scenario3={setScenario3}
           />
