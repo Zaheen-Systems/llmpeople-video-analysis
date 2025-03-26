@@ -1,20 +1,33 @@
 import { Humanoid } from "@/lib/babylonjs/Humanoid";
+import { RespondingData } from "@/lib/hooks/useUploadVideo";
 import { CurrentSoundRef, HumanoidRef } from "@/lib/types";
-import React, { ReactNode, createContext, useContext, useRef } from "react";
+import React, { ReactNode, createContext, useContext, useRef, useState } from "react";
 
 type GameContext = {
   humanoidRef: HumanoidRef;
   currentSoundRef: CurrentSoundRef;
+  uploadLoading: React.MutableRefObject<boolean>;
+  uploadError: string | null;
+  respondingData: React.MutableRefObject<RespondingData | null>;
+  setUploadLoading: (loading: boolean) => void;
+  setUploadError: (error: string | null) => void;
+  setRespondingData: (data: RespondingData | null) => void;
 };
 
 const defaultGameContext: GameContext = {
   humanoidRef: { current: null },
   currentSoundRef: { current: null },
+  uploadLoading: { current: false },
+  uploadError: null,
+  respondingData: { current: null },
+  setUploadLoading: () => {},
+  setUploadError: () => {},
+  setRespondingData: () => {},
 };
 
-const GameContextContext = createContext<GameContext>(defaultGameContext);
+export const GameContextContext = createContext<GameContext>(defaultGameContext);
 
-const useGameContext = () => {
+export const useGameContext = () => {
   return useContext(GameContextContext);
 };
 
@@ -22,15 +35,33 @@ interface GameContextProviderProps {
   children: ReactNode;
 }
 
-const GameContextProvider: React.FC<GameContextProviderProps> = ({ children }) => {
+export const GameContextProvider: React.FC<GameContextProviderProps> = ({ children }) => {
   const humanoidRef = useRef<Humanoid | null>(null);
   const currentSoundRef = useRef<HTMLAudioElement | null>(null);
+  const uploadLoading = useRef<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const respondingData = useRef<RespondingData | null>(null);
 
-  return (
-    <GameContextContext.Provider value={{ humanoidRef, currentSoundRef }}>
-      {children}
-    </GameContextContext.Provider>
-  );
+  const setUploadLoading = (loading: boolean) => {
+    uploadLoading.current = loading;
+  };
+
+  const setRespondingData = (data: RespondingData | null) => {
+    respondingData.current = data;
+  };
+
+  const value = {
+    humanoidRef,
+    currentSoundRef,
+    uploadLoading,
+    uploadError,
+    respondingData,
+    setUploadLoading,
+    setUploadError,
+    setRespondingData,
+  };
+
+  return <GameContextContext.Provider value={value}>{children}</GameContextContext.Provider>;
 };
 
-export { GameContextProvider, useGameContext };
+export default GameContextProvider;

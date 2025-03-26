@@ -94,7 +94,7 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
     mainStateReducer,
     defaultState
   );
-
+  const { respondingData, uploadLoading } = useGameContext();
   useGetInitialSettings(mainStateDispatch, mainState.settings);
 
   if (mainState.initErrorMessage.includes("WebGL not supported")) {
@@ -112,8 +112,8 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
         overflow: "hidden",
       }}
     >
-      {mainState.showRespondingComponent ? (
-        <RespondingComponent respondingData={mainState.respondingData} />
+      {mainState.showRespondingComponent && !uploadLoading.current ? (
+        <RespondingComponent respondingData={respondingData.current!} />
       ) : (
         <>
           <Loading isLoading={mainState.isLoading} />

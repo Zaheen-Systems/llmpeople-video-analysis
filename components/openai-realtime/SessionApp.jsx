@@ -1,5 +1,4 @@
 import { useGameContext } from "@/components/GameContextProvider";
-import useUploadVideo from "@/lib/hooks/useUploadVideo";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { useEffect, useRef, useState } from "react";
 import SessionControls from "./SessionControls";
@@ -21,8 +20,7 @@ Once the trainee selects a scenario, simulate that scenario with realistic custo
   const [dataChannel, setDataChannel] = useState(null);
   const peerConnection = useRef(null);
   const audioElement = useRef(null);
-  const { humanoidRef } = useGameContext();
-  const { respondingData, loading, uploadVideo } = useUploadVideo();
+  const { humanoidRef, uploadLoading } = useGameContext();
   const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
 
   const setScenario1 = () => {
@@ -154,13 +152,12 @@ Once the trainee selects a scenario, simulate that scenario with realistic custo
     setDataChannel(null);
     setIsSessionActive(false);
     mainStateDispatch({ type: "SET_IS_LOADING", payload: true });
-    const blob = await stopRecording();
-    if (blob) {
-      await uploadVideo("responding", blob);
+    await stopRecording();
+    while (uploadLoading.current) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    console.log("---------responding data: ", respondingData.current);
     mainStateDispatch({ type: "SET_IS_LOADING", payload: false });
-    mainStateDispatch({ type: "SET_RESPONDING_DATA", payload: respondingData.current });
+
     mainStateDispatch({ type: "SHOW_RESPONDING_COMPONENT", payload: true });
   }
 
@@ -244,24 +241,20 @@ Once the trainee selects a scenario, simulate that scenario with realistic custo
 
   return (
     <>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <section className="absolute h-32 left-0 right-0 bottom-0 p-4 bg-red-800 z-10">
-          <SessionControls
-            startSession={startSession}
-            stopSession={stopSession}
-            sendClientEvent={sendClientEvent}
-            sendTextMessage={sendTextMessage}
-            events={events}
-            isSessionActive={isSessionActive}
-            isRecording={isRecording}
-            scenario1={setScenario1}
-            scenario2={setScenario2}
-            scenario3={setScenario3}
-          />
-        </section>
-      )}
+      <section className="absolute h-32 left-0 right-0 bottom-0 p-4 bg-red-800 z-10">
+        <SessionControls
+          startSession={startSession}
+          stopSession={stopSession}
+          sendClientEvent={sendClientEvent}
+          sendTextMessage={sendTextMessage}
+          events={events}
+          isSessionActive={isSessionActive}
+          isRecording={isRecording}
+          scenario1={setScenario1}
+          scenario2={setScenario2}
+          scenario3={setScenario3}
+        />
+      </section>
     </>
   );
 }

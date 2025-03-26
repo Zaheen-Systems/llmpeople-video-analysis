@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import useUploadVideo from "./useUploadVideo";
 
 interface VideoRecordingHook {
   startRecording: () => Promise<void>;
@@ -7,16 +8,38 @@ interface VideoRecordingHook {
   error: string | null;
 }
 
+const ONE_MINUTE = 60000; // 1 minute in milliseconds
+
 export const useVideoRecording = (): VideoRecordingHook => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const chunksRef = useRef<Blob[]>([]); // New ref to store chunks
+  const chunksRef = useRef<Blob[]>([]);
+  const oneMinuteChunksRef = useRef<Blob[]>([]);
+  const hasUploadedOneMinute = useRef<boolean>(false);
+  const recordingStartTime = useRef<number>(0);
+  const { uploadVideo } = useUploadVideo();
+
+  const handleOneMinuteRecording = useCallback(async () => {
+    // Double-check to prevent multiple calls
+    if (hasUploadedOneMinute.current) {
+      return;
+    }
+
+    hasUploadedOneMinute.current = true; // Set this BEFORE the upload to prevent race conditions
+
+    const mimeType = mediaRecorder?.mimeType || "video/webm";
+    const oneMinuteBlob = new Blob(oneMinuteChunksRef.current, { type: mimeType });
+
+    await uploadVideo("responding", oneMinuteBlob);
+  }, [uploadVideo]);
+
   const startRecording = async (): Promise<void> => {
-    chunksRef.current = []; // Clear chunks ref
-    setRecordedChunks([]);
+    chunksRef.current = [];
+    oneMinuteChunksRef.current = [];
+    hasUploadedOneMinute.current = false;
+    recordingStartTime.current = Date.now();
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -48,14 +71,26 @@ export const useVideoRecording = (): VideoRecordingHook => {
         videoBitsPerSecond: 2500000, // 2.5 Mbps
       });
 
+      // Set up a single timeout for the one-minute mark
+      const oneMinuteTimeout = setTimeout(() => {
+        if (!hasUploadedOneMinute.current) {
+          handleOneMinuteRecording();
+        }
+      }, ONE_MINUTE);
+
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          console.log("Received chunk of size:", event.data.size);
           chunksRef.current.push(event.data);
+
+          // Only store chunks for the first minute
+          if (!hasUploadedOneMinute.current) {
+            oneMinuteChunksRef.current.push(event.data);
+          }
         }
       };
 
-      recorder.onstop = async () => {
+      recorder.onstop = () => {
+        clearTimeout(oneMinuteTimeout); // Clean up timeout if recording stops early
         console.log("Total chunks collected:", chunksRef.current.length);
         console.log(
           "Total size of chunks:",
@@ -76,7 +111,7 @@ export const useVideoRecording = (): VideoRecordingHook => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         chunksRef.current = [];
-        setRecordedChunks([]);
+        oneMinuteChunksRef.current = [];
       };
 
       // Request data more frequently
@@ -115,7 +150,6 @@ export const useVideoRecording = (): VideoRecordingHook => {
 
           // Cleanup
           chunksRef.current = [];
-          setRecordedChunks([]);
           resolve(blob);
         };
 
