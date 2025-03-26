@@ -225,7 +225,7 @@ export default function SessionApp({ mainStateDispatch }) {
         setIsSessionActive(true);
         setEvents([]);
         sendSystemMessage(systemMessage);
-        sendTextMessage("Hey There, Explain about yourself");
+        sendTextMessage("Hey There, Explain about yourself, be consice");
       });
     }
   }, [dataChannel]);

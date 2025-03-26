@@ -6,10 +6,10 @@ import React, { ReactNode, createContext, useContext, useRef, useState } from "r
 type GameContext = {
   humanoidRef: HumanoidRef;
   currentSoundRef: CurrentSoundRef;
-  uploadLoading: React.MutableRefObject<boolean>;
+  uploadLoading: React.MutableRefObject<boolean | null>;
   uploadError: string | null;
   respondingData: React.MutableRefObject<RespondingData | null>;
-  setUploadLoading: (loading: boolean) => void;
+  setUploadLoading: (loading: boolean | null) => void;
   setUploadError: (error: string | null) => void;
   setRespondingData: (data: RespondingData | null) => void;
 };
@@ -17,7 +17,7 @@ type GameContext = {
 const defaultGameContext: GameContext = {
   humanoidRef: { current: null },
   currentSoundRef: { current: null },
-  uploadLoading: { current: false },
+  uploadLoading: { current: null },
   uploadError: null,
   respondingData: { current: null },
   setUploadLoading: () => {},
@@ -38,11 +38,11 @@ interface GameContextProviderProps {
 export const GameContextProvider: React.FC<GameContextProviderProps> = ({ children }) => {
   const humanoidRef = useRef<Humanoid | null>(null);
   const currentSoundRef = useRef<HTMLAudioElement | null>(null);
-  const uploadLoading = useRef<boolean>(false);
+  const uploadLoading = useRef<boolean | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const respondingData = useRef<RespondingData | null>(null);
 
-  const setUploadLoading = (loading: boolean) => {
+  const setUploadLoading = (loading: boolean | null) => {
     uploadLoading.current = loading;
   };
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { CloudLightning, CloudOff } from "react-feather";
+import { CloudLightning, CloudOff, List } from "react-feather";
 import styled from "styled-components";
+import { useGameContext } from "../GameContextProvider";
 import Button from "./Button";
 
 const Container = styled.div`
@@ -86,6 +87,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
 
 function SessionActive({ stopSession, sendTextMessage, isRecording }) {
   const [message, setMessage] = useState("");
+  const { uploadLoading } = useGameContext();
 
   function handleSendClientEvent() {
     sendTextMessage(message);
@@ -97,6 +99,12 @@ function SessionActive({ stopSession, sendTextMessage, isRecording }) {
       <Button onClick={stopSession} icon={<CloudOff height={16} />}>
         Submit
       </Button>
+
+      {uploadLoading.current !== null && (
+        <Button disabled={uploadLoading.current} onClick={stopSession} icon={<List height={16} />}>
+          Results
+        </Button>
+      )}
     </SessionActiveContainer>
   );
 }
