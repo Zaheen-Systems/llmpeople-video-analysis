@@ -96,7 +96,11 @@ function SessionActive({ stopSession, sendTextMessage, isRecording }) {
 
   return (
     <SessionActiveContainer>
-      <Button onClick={stopSession} icon={<CloudOff height={16} />}>
+      <Button
+        disabled={uploadLoading.current === null}
+        onClick={stopSession}
+        icon={<CloudOff height={16} />}
+      >
         Submit
       </Button>
 
