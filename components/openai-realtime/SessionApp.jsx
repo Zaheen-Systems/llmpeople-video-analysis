@@ -2,7 +2,19 @@ import { useGameContext } from "@/components/GameContextProvider";
 import { Scenario1, Scenario2, scenario3 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { useEffect, useRef, useState } from "react";
+import styled from "styled-components";
 import SessionControls from "./SessionControls";
+
+const ControlsSection = styled.section`
+  position: absolute;
+  height: 32px; /* equivalent to h-32 */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px; /* equivalent to p-4 */
+  background-color: rgb(255, 255, 255); /* equivalent to bg-red-800 */
+  z-index: 10;
+`;
 
 export default function SessionApp({ mainStateDispatch }) {
   const [systemMessage, setSystemMessage] = useState(Scenario1);
@@ -232,7 +244,7 @@ export default function SessionApp({ mainStateDispatch }) {
 
   return (
     <>
-      <section className="absolute h-32 left-0 right-0 bottom-0 p-4 bg-red-800 z-10">
+      <ControlsSection>
         <SessionControls
           startSession={startSession}
           stopSession={stopSession}
@@ -245,7 +257,7 @@ export default function SessionApp({ mainStateDispatch }) {
           scenario2={setScenario2}
           scenario3={setScenario3}
         />
-      </section>
+      </ControlsSection>
     </>
   );
 }

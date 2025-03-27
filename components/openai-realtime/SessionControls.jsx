@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CloudLightning, CloudOff, List } from "react-feather";
+import { CloudLightning, List } from "react-feather";
 import styled from "styled-components";
 import { useGameContext } from "../GameContextProvider";
 import Button from "./Button";
@@ -47,6 +47,7 @@ const SessionActiveContainer = styled.div`
   width: 100%;
   height: 100%;
   gap: 0.5rem;
+  z-index: 100000;
 `;
 
 function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
@@ -115,13 +116,13 @@ function SessionActive({ stopSession, sendTextMessage, isRecording }) {
 
   return (
     <SessionActiveContainer>
-      <Button
+      {/* <Button
         disabled={uploadLoading.current === null}
         onClick={stopSession}
         icon={<CloudOff height={16} />}
       >
         Submit
-      </Button>
+      </Button> */}
 
       {uploadLoading.current !== null && (
         <Button disabled={uploadLoading.current} onClick={stopSession} icon={<List height={16} />}>
