@@ -25,7 +25,19 @@ const SessionStoppedContainer = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
-  gap: 0.5rem;
+  gap: 1rem;
+
+  /* Make buttons stack on smaller screens */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 230px;
+    margin: 0 auto;
+  }
+`;
+
+const ScenarioButton = styled(Button)`
+  width: 230px; /* Fixed width for scenario buttons */
 `;
 
 const SessionActiveContainer = styled.div`
@@ -42,14 +54,13 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
 
   function handleStartSession() {
     if (isActivating) return;
-
     setIsActivating(true);
     startSession();
   }
 
   return (
     <SessionStoppedContainer>
-      <Button
+      <ScenarioButton
         onClick={() => {
           scenario1();
           handleStartSession();
@@ -58,9 +69,9 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
         icon={<CloudLightning height={16} />}
       >
         {isActivating ? "starting session..." : "Language Learning Coach"}
-      </Button>
+      </ScenarioButton>
 
-      <Button
+      <ScenarioButton
         onClick={() => {
           scenario2();
           handleStartSession();
@@ -69,9 +80,9 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
         icon={<CloudLightning height={16} />}
       >
         {isActivating ? "starting session..." : "Sales Coach"}
-      </Button>
+      </ScenarioButton>
 
-      <Button
+      <ScenarioButton
         onClick={() => {
           scenario3();
           handleStartSession();
@@ -80,7 +91,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
         icon={<CloudLightning height={16} />}
       >
         {isActivating ? "starting session..." : "Customer Service Coach"}
-      </Button>
+      </ScenarioButton>
     </SessionStoppedContainer>
   );
 }
