@@ -58,6 +58,26 @@ const FeedbackText = styled.p`
   margin-bottom: 8px;
 `;
 
+const TryAgainButton = styled.button`
+  background-color: white;
+  color: #22409a;
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 16px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
 interface FacialExpressions {
   calmAndApproachableExpression: string;
   engagedListening: string;
@@ -100,6 +120,10 @@ interface RespondingComponentProps {
 }
 
 const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingData }) => {
+  const handleTryAgain = () => {
+    window.location.reload();
+  };
+
   const renderYesNo = (label: string, value: string) => (
     <ListItem>
       <StrongText>{label}:</StrongText> {value}
@@ -193,6 +217,9 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
           {respondingData.feedback.improvementSuggestions}
         </FeedbackText>
       </Section>
+
+      {/* Try Again Button */}
+      <TryAgainButton onClick={handleTryAgain}>Try Again</TryAgainButton>
     </Container>
   );
 };
