@@ -210,11 +210,16 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
       {/* Feedback */}
       <Section>
         <FeedbackText>
-          <StrongText>You did well at:</StrongText> {respondingData.feedback.positiveAreas}
+          <StrongText>You did well at:</StrongText>{" "}
+          {respondingData.feedback.positiveAreas
+            .replaceAll("staff", "you")
+            .replaceAll("Staff", "You")}
         </FeedbackText>
         <FeedbackText>
           <StrongText>You can improve by focusing on:</StrongText>{" "}
-          {respondingData.feedback.improvementSuggestions}
+          {respondingData.feedback.improvementSuggestions
+            .replaceAll("staff", "you")
+            .replaceAll("Staff", "You")}
         </FeedbackText>
       </Section>
 
