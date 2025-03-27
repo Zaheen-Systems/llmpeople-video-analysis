@@ -51,47 +51,55 @@ const SessionActiveContainer = styled.div`
 
 function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
   const [isActivating, setIsActivating] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState(null);
 
-  function handleStartSession() {
+  function handleStartSession(scenarioNumber, scenarioFn) {
     if (isActivating) return;
     setIsActivating(true);
+    setSelectedScenario(scenarioNumber);
+    scenarioFn();
     startSession();
   }
 
   return (
     <SessionStoppedContainer>
-      <ScenarioButton
-        onClick={() => {
-          scenario1();
-          handleStartSession();
-        }}
-        $isActive={isActivating}
-        icon={<CloudLightning height={16} />}
-      >
-        {isActivating ? "starting session..." : "Language Learning Coach"}
-      </ScenarioButton>
+      {!selectedScenario ? (
+        <>
+          <ScenarioButton
+            onClick={() => handleStartSession(1, scenario1)}
+            $isActive={isActivating && selectedScenario === 1}
+            icon={<CloudLightning height={16} />}
+          >
+            Language Learning Coach
+          </ScenarioButton>
 
-      <ScenarioButton
-        onClick={() => {
-          scenario2();
-          handleStartSession();
-        }}
-        $isActive={isActivating}
-        icon={<CloudLightning height={16} />}
-      >
-        {isActivating ? "starting session..." : "Sales Coach"}
-      </ScenarioButton>
+          <ScenarioButton
+            onClick={() => handleStartSession(2, scenario2)}
+            $isActive={isActivating && selectedScenario === 2}
+            icon={<CloudLightning height={16} />}
+          >
+            Sales Coach
+          </ScenarioButton>
 
-      <ScenarioButton
-        onClick={() => {
-          scenario3();
-          handleStartSession();
-        }}
-        $isActive={isActivating}
-        icon={<CloudLightning height={16} />}
-      >
-        {isActivating ? "starting session..." : "Customer Service Coach"}
-      </ScenarioButton>
+          <ScenarioButton
+            onClick={() => handleStartSession(3, scenario3)}
+            $isActive={isActivating && selectedScenario === 3}
+            icon={<CloudLightning height={16} />}
+          >
+            Customer Service Coach
+          </ScenarioButton>
+        </>
+      ) : (
+        <ScenarioButton $isActive={true} icon={<CloudLightning height={16} />}>
+          {isActivating
+            ? "starting session..."
+            : selectedScenario === 1
+            ? "Language Learning Coach"
+            : selectedScenario === 2
+            ? "Sales Coach"
+            : "Customer Service Coach"}
+        </ScenarioButton>
+      )}
     </SessionStoppedContainer>
   );
 }
