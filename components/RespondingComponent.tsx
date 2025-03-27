@@ -8,7 +8,7 @@ const Container = styled.div`
   border-radius: 44px;
   margin: 0 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  max-height: 80vh;
+  max-height: 90vh;
   overflow-y: auto;
 
   /* Custom scrollbar styling */
