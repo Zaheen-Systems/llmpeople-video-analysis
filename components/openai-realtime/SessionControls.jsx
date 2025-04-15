@@ -71,7 +71,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
             $isActive={isActivating && selectedScenario === 1}
             icon={<CloudLightning height={16} />}
           >
-            Language Learning Coach
+            Language Learning
           </ScenarioButton>
 
           <ScenarioButton
@@ -79,7 +79,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
             $isActive={isActivating && selectedScenario === 2}
             icon={<CloudLightning height={16} />}
           >
-            Sales Coach
+            Sales
           </ScenarioButton>
 
           <ScenarioButton
@@ -87,7 +87,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
             $isActive={isActivating && selectedScenario === 3}
             icon={<CloudLightning height={16} />}
           >
-            Customer Service Coach
+            Customer Service
           </ScenarioButton>
         </>
       ) : (
