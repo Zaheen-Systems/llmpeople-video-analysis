@@ -1,5 +1,5 @@
 import { useGameContext } from "@/components/GameContextProvider";
-import { Scenario1, Scenario2, scenario3 } from "@/lib/constants";
+import { Scenario1, Scenario2, scenario3, scenario4 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -18,24 +18,34 @@ const ControlsSection = styled.section`
 
 export default function SessionApp({ mainStateDispatch }) {
   const [systemMessage, setSystemMessage] = useState(Scenario1);
-  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [currentScenario, setCurrentScenario] = useState("1");
   const [events, setEvents] = useState([]);
   const [dataChannel, setDataChannel] = useState(null);
+  const [isSessionActive, setIsSessionActive] = useState(false);
   const peerConnection = useRef(null);
   const audioElement = useRef(null);
   const { humanoidRef, uploadLoading } = useGameContext();
-  const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
+  const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording(currentScenario);
 
   const setScenario1 = () => {
     setSystemMessage(Scenario1);
+    setCurrentScenario("1");
   };
 
   const setScenario2 = () => {
     setSystemMessage(Scenario2);
+    setCurrentScenario("2");
   };
 
   const setScenario3 = () => {
     setSystemMessage(scenario3);
+    setCurrentScenario("3");
+  };
+
+  const setScenario4 = () => {
+    setSystemMessage(scenario4);
+    setCurrentScenario("4");
+    console.log("Scenario 4 selected, currentScenario set to: 4");
   };
 
   useEffect(() => {
@@ -49,7 +59,13 @@ export default function SessionApp({ mainStateDispatch }) {
     console.log("events changed:", events);
   }, [events]);
 
-  async function startSession() {
+  async function startSession(scenarioOverride) {
+    console.log("startSession called with scenarioOverride:", scenarioOverride);
+    // Update current scenario if provided
+    if (scenarioOverride) {
+      setCurrentScenario(scenarioOverride);
+      console.log("Updated currentScenario to:", scenarioOverride);
+    }
     // Get an ephemeral key from the Fastify server
     let tokenResponse;
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
@@ -140,7 +156,9 @@ export default function SessionApp({ mainStateDispatch }) {
     await pc.setRemoteDescription(answer);
 
     peerConnection.current = pc;
-    await startRecording();
+    const scenarioForRecording = scenarioOverride || currentScenario;
+    console.log("Starting recording with scenario:", scenarioForRecording);
+    await startRecording(scenarioForRecording);
   }
 
   // Stop current session, clean up peer connection and data channel
@@ -256,6 +274,7 @@ export default function SessionApp({ mainStateDispatch }) {
           scenario1={setScenario1}
           scenario2={setScenario2}
           scenario3={setScenario3}
+          scenario4={setScenario4}
         />
       </ControlsSection>
     </>

@@ -40,29 +40,25 @@ export interface RespondingData {
 const useUploadVideo = () => {
   const { uploadLoading, setUploadError, setRespondingData } = useGameContext();
 
-  const uploadVideo = async (videoTag: string, video: Blob | null) => {
+  const uploadVideo = async (videoTag: string, video: Blob | null, scenario: string = "1") => {
     uploadLoading.current = true;
     setUploadError(null);
 
     try {
       const formData = new FormData();
-      formData.append("video_tag", videoTag);
+      formData.append("scenario", scenario);
       if (video !== null) {
         formData.append("video_file", video);
       }
 
       console.log("Uploading video...");
-      const response = await fetch(
-        "https://ial-backend.zaheen.ai/api/v1/activity-progress/ai-activity",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch("https://vira.zaheen.ai/run_ai_activity", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -72,7 +68,7 @@ const useUploadVideo = () => {
       const result = responseText ? JSON.parse(responseText) : null;
       console.log("Result:", result);
       if (result !== null) {
-        setRespondingData(result);
+        setRespondingData(result.result || result);
       } else {
         throw new Error("Empty response from server");
       }

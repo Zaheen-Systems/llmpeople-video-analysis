@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CloudLightning, List } from "react-feather";
 import styled from "styled-components";
 import { useGameContext } from "../GameContextProvider";
@@ -50,7 +50,7 @@ const SessionActiveContainer = styled.div`
   z-index: 100000;
 `;
 
-function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
+function SessionStopped({ startSession, scenario1, scenario2, scenario3, scenario4 }) {
   const [isActivating, setIsActivating] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState(null);
 
@@ -59,7 +59,7 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
     setIsActivating(true);
     setSelectedScenario(scenarioNumber);
     scenarioFn();
-    startSession();
+    startSession(scenarioNumber.toString());
   }
 
   return (
@@ -89,16 +89,26 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
           >
             Customer Service
           </ScenarioButton>
+
+          <ScenarioButton
+            onClick={() => handleStartSession(4, scenario4)}
+            $isActive={isActivating && selectedScenario === 4}
+            icon={<CloudLightning height={16} />}
+          >
+            Roleplay
+          </ScenarioButton>
         </>
       ) : (
         <ScenarioButton $isActive={true} icon={<CloudLightning height={16} />}>
           {isActivating
             ? "starting session..."
             : selectedScenario === 1
-            ? "Language Learning Coach"
-            : selectedScenario === 2
-            ? "Sales Coach"
-            : "Customer Service Coach"}
+              ? "Language Learning Coach"
+              : selectedScenario === 2
+                ? "Sales Coach"
+                : selectedScenario === 3
+                  ? "Customer Service Coach"
+                  : "Roleplay Coach"}
         </ScenarioButton>
       )}
     </SessionStoppedContainer>
@@ -107,7 +117,19 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3 }) {
 
 function SessionActive({ stopSession, sendTextMessage, isRecording }) {
   const [message, setMessage] = useState("");
-  const { uploadLoading } = useGameContext();
+  const { uploadLoading, respondingData } = useGameContext();
+  const [, forceUpdate] = useState({});
+
+  // Force re-render when upload completes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (uploadLoading.current === false && respondingData.current !== null) {
+        forceUpdate({});
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [uploadLoading, respondingData]);
 
   function handleSendClientEvent() {
     sendTextMessage(message);
@@ -124,8 +146,8 @@ function SessionActive({ stopSession, sendTextMessage, isRecording }) {
         Submit
       </Button> */}
 
-      {uploadLoading.current !== null && (
-        <Button disabled={uploadLoading.current} onClick={stopSession} icon={<List height={16} />}>
+      {(uploadLoading.current !== null || respondingData.current !== null) && (
+        <Button disabled={uploadLoading.current === true} onClick={stopSession} icon={<List height={16} />}>
           Results
         </Button>
       )}
@@ -151,6 +173,7 @@ export default function SessionControls({
   scenario1,
   scenario2,
   scenario3,
+  scenario4,
   isRecording,
 }) {
   return (
@@ -169,6 +192,7 @@ export default function SessionControls({
           scenario1={scenario1}
           scenario2={scenario2}
           scenario3={scenario3}
+          scenario4={scenario4}
         />
       )}
     </Container>

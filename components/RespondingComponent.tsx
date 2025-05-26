@@ -136,8 +136,30 @@ interface RespondingData {
   feedback: Feedback;
 }
 
+interface Feedback {
+  positiveAreas: string;
+  improvementSuggestions: string;
+}
+
+interface AdamRubricEvaluation {
+  empathyAndEmotionalSensitivity: { score: number; explanation: string };
+  activeListening: { score: number; explanation: string };
+  creatingPsychologicalSafety: { score: number; explanation: string };
+  handlingDisclosure: { score: number; explanation: string };
+  encouragingNextSteps: { score: number; explanation: string };
+}
+
+interface AdamRespondingData {
+  rubricEvaluation: AdamRubricEvaluation;
+  totalScore: number;
+  scoreInterpretation: string;
+  suggestionsForImprovement: string;
+}
+
+// Update the main interface to handle both types
 interface RespondingComponentProps {
-  respondingData: RespondingData;
+  respondingData: RespondingData | AdamRespondingData;
+  scenario?: string;
 }
 
 const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingData }) => {
@@ -159,6 +181,73 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
     </StarsContainer>
   );
 
+  const renderRubricItem = (label: string, item: { score: number; explanation: string }) => (
+    <ListItem>
+      <StrongText>{label}:</StrongText> {renderStars(item.score)}
+      <div style={{ marginLeft: '16px', fontSize: '0.9rem', marginTop: '4px' }}>
+        {item.explanation}
+      </div>
+    </ListItem>
+  );
+
+  // Type guard to check if it's Adam scenario data
+  const isAdamData = (data: any): data is AdamRespondingData => {
+    return 'rubricEvaluation' in data;
+  };
+
+  if (isAdamData(respondingData)) {
+    // Render Adam scenario (scenario 4) layout
+    return (
+      <Container>
+        <Title>Here is how you did</Title>
+
+        {/* Rubric Evaluation */}
+        <Section>
+          <SectionTitle>Evaluation Rubric</SectionTitle>
+          <List>
+            {renderRubricItem(
+              "Empathy and Emotional Sensitivity",
+              respondingData.rubricEvaluation.empathyAndEmotionalSensitivity
+            )}
+            {renderRubricItem(
+              "Active Listening",
+              respondingData.rubricEvaluation.activeListening
+            )}
+            {renderRubricItem(
+              "Creating Psychological Safety",
+              respondingData.rubricEvaluation.creatingPsychologicalSafety
+            )}
+            {renderRubricItem(
+              "Handling Disclosure",
+              respondingData.rubricEvaluation.handlingDisclosure
+            )}
+            {renderRubricItem(
+              "Encouraging Next Steps",
+              respondingData.rubricEvaluation.encouragingNextSteps
+            )}
+          </List>
+        </Section>
+
+        {/* Total Score */}
+        <Section>
+          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/25 ({respondingData.scoreInterpretation})
+        </Section>
+
+        {/* Suggestions */}
+        <Section>
+          <FeedbackText>
+            <StrongText>Suggestions for Improvement:</StrongText>{" "}
+            {respondingData.suggestionsForImprovement}
+          </FeedbackText>
+        </Section>
+
+        {/* Try Again Button */}
+        <TryAgainButton onClick={handleTryAgain}>Try Again</TryAgainButton>
+      </Container>
+    );
+  }
+
+  // Render regular scenario (1, 2, 3) layout
   return (
     <Container>
       <Title>Here is how you did</Title>

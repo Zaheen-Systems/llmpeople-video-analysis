@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import useUploadVideo from "./useUploadVideo";
 
 interface VideoRecordingHook {
-  startRecording: () => Promise<void>;
+  startRecording: (scenarioOverride?: string) => Promise<void>;
   stopRecording: () => Promise<Blob | null>;
   isRecording: boolean;
   error: string | null;
@@ -10,15 +10,17 @@ interface VideoRecordingHook {
 
 const ONE_MINUTE = 60000; // 1 minute in milliseconds
 
-export const useVideoRecording = (): VideoRecordingHook => {
+export const useVideoRecording = (currentScenario?: string): VideoRecordingHook => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const oneMinuteChunksRef = useRef<Blob[]>([]);
   const hasUploadedOneMinute = useRef<boolean>(false);
   const recordingStartTime = useRef<number>(0);
+  const scenarioRef = useRef<string | undefined>(undefined);
   const { uploadVideo } = useUploadVideo();
 
   const handleOneMinuteRecording = useCallback(async () => {
@@ -27,23 +29,59 @@ export const useVideoRecording = (): VideoRecordingHook => {
       return;
     }
 
+    console.log("Starting 1-minute upload process...");
     hasUploadedOneMinute.current = true; // Set this BEFORE the upload to prevent race conditions
 
-    const mimeType = mediaRecorder?.mimeType || "video/webm";
-    const oneMinuteBlob = new Blob(oneMinuteChunksRef.current, { type: mimeType });
+    // Create a temporary recorder to get a proper 1-minute segment
+    try {
+      const currentRecorder = mediaRecorderRef.current;
+      if (!currentRecorder || currentRecorder.state !== "recording") {
+        console.log("No active recorder for 1-minute upload");
+        return;
+      }
 
-    await uploadVideo("responding", oneMinuteBlob);
-  }, [uploadVideo]);
+      // Request data to ensure we have the latest chunk
+      currentRecorder.requestData();
 
-  const startRecording = async (): Promise<void> => {
+      // Wait a bit longer for the data to be available
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const mimeType = currentRecorder.mimeType || "video/webm";
+      const oneMinuteBlob = new Blob(oneMinuteChunksRef.current, { type: mimeType });
+
+      console.log("1-minute blob size:", oneMinuteBlob.size, "chunks:", oneMinuteChunksRef.current.length);
+
+      // Only upload if we have substantial data
+      if (oneMinuteBlob.size > 50000) { // Increased threshold to 50KB
+        const scenarioToUse = scenarioRef.current || currentScenario;
+        console.log("Uploading video with scenario:", scenarioToUse);
+        await uploadVideo("responding", oneMinuteBlob, scenarioToUse);
+      } else {
+        console.log("Skipping 1-minute upload - insufficient data:", oneMinuteBlob.size);
+        hasUploadedOneMinute.current = false; // Reset so we can try again
+      }
+    } catch (error) {
+      console.error("Error in 1-minute upload:", error);
+      hasUploadedOneMinute.current = false; // Reset on error
+    }
+  }, [uploadVideo, currentScenario]);
+
+  const startRecording = async (scenarioOverride?: string): Promise<void> => {
+    console.log("startRecording called with scenarioOverride:", scenarioOverride);
     chunksRef.current = [];
     oneMinuteChunksRef.current = [];
     hasUploadedOneMinute.current = false;
     recordingStartTime.current = Date.now();
+    scenarioRef.current = scenarioOverride;
+    console.log("scenarioRef.current set to:", scenarioRef.current);
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 15 }
+        },
         audio: true,
       });
 
@@ -68,7 +106,7 @@ export const useVideoRecording = (): VideoRecordingHook => {
 
       const recorder = new MediaRecorder(stream, {
         mimeType,
-        videoBitsPerSecond: 2500000, // 2.5 Mbps
+        videoBitsPerSecond: 500000, // 0.5 Mbps (reduced from 2.5 Mbps)
       });
 
       // Set up a single timeout for the one-minute mark
@@ -114,10 +152,11 @@ export const useVideoRecording = (): VideoRecordingHook => {
         oneMinuteChunksRef.current = [];
       };
 
-      // Request data more frequently
-      recorder.start(100); // Collect data every 100ms
+      // Request data less frequently to reduce memory usage
+      recorder.start(1000); // Collect data every 1000ms (1 second)
       console.log("Recording started with MIME type:", mimeType);
       setMediaRecorder(recorder);
+      mediaRecorderRef.current = recorder;
       setIsRecording(true);
       setError(null);
     } catch (err) {
@@ -171,6 +210,7 @@ export const useVideoRecording = (): VideoRecordingHook => {
           mediaRecorder.stop();
           setIsRecording(false);
           setMediaRecorder(null);
+          mediaRecorderRef.current = null;
         }, 100);
       } else {
         resolve(null);

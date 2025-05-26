@@ -156,7 +156,7 @@ export class Humanoid {
 
       this.callback();
 
-      this.blinkTimeoutId = window.setTimeout(() => this.blink(), 2000);
+      this.blinkTimeoutId = window.setTimeout(() => this.blink(), 1);
 
       // Debug the talking animations.
       // this.talkAnimationStart();
@@ -293,7 +293,7 @@ export class Humanoid {
       return;
     }
 
-    const blinkOpenTimeSeconds = 0.15;
+    const blinkOpenTimeSeconds = 0.2;
     const blinkCloseTimeSeconds = 0.2;
 
     const leftEyeCloseTarget = this.getMorphTargetByName(
@@ -327,7 +327,7 @@ export class Humanoid {
     playMorphTargetAnim(
       "leftEyeBlink",
       [0, blinkCloseTimeSeconds, blinkOpenTimeSeconds],
-      [0, 1, 0],
+      [0.2, 1, 0.3],
       leftEyeCloseTarget,
       () => blinkEndCallback(true),
       this.scene
@@ -335,7 +335,7 @@ export class Humanoid {
     playMorphTargetAnim(
       "rightEyeBlink",
       [0, blinkCloseTimeSeconds, blinkOpenTimeSeconds],
-      [0, 1, 0],
+      [0.2, 1, 0.3],
       rightEyeCloseTarget,
       () => blinkEndCallback(false),
       this.scene
