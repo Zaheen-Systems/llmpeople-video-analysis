@@ -13,7 +13,6 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 import styled from "styled-components";
 import { useGameContext } from "../GameContextProvider";
 import { useInitialChatMessage } from "../hooks";
-import { ChatErrors } from "./ChatErrors.server";
 //import { LLMMessage } from "./LLMMessage.client";
 type ChatMessagesProps = {
   messages: ChatMessage[];
@@ -31,11 +30,11 @@ const ChatMessages = memo(function ChatMessages({ messages }: ChatMessagesProps)
   return (
     <>
       {/* ✅ This removes both LLMMessage and UserMessage */}
-{messages.map((message, index) => (
-  <div key={index} className="p-3 bg-gray-700 rounded-lg shadow-md">
-    <p>{message.content}</p>  {/* ✅ Only displays plain text */}
-  </div>
-))}
+      {messages.map((message, index) => (
+        <div key={index} className="p-3 bg-gray-700 rounded-lg shadow-md">
+          <p>{message.content}</p>  {/* ✅ Only displays plain text */}
+        </div>
+      ))}
 
 
       <div ref={endRef} /> {/* Invisible div for auto scrolling purposes */}
@@ -150,19 +149,6 @@ type ChatProps = {
 
 export const Chat = ({ mainStateDispatch, chatState, settings }: ChatProps) => {
   useInitialChatMessage(mainStateDispatch, settings);
-
-  return (
-    <ChatWrapper>
-      <ChatMessagesWrapper>
-        <ChatMessages messages={chatState.messages} />
-      </ChatMessagesWrapper>
-
-      {/* ✅ Removed ChatTextArea */}
-
-
-      <ChatErrors errorMessage={chatState.errorMessage} charCount={chatState.charCount} />
-    </ChatWrapper>
-  );
 };
 
 const ChatWrapper = styled.div`

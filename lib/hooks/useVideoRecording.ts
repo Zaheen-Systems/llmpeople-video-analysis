@@ -8,9 +8,9 @@ interface VideoRecordingHook {
   error: string | null;
 }
 
-const ONE_MINUTE = 60000; // 1 minute in milliseconds
+const RECORDING_DURATION = 80000; // 80 seconds in milliseconds
 
-export const useVideoRecording = (currentScenario?: string): VideoRecordingHook => {
+export const useVideoRecording = (): VideoRecordingHook => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,20 +23,20 @@ export const useVideoRecording = (currentScenario?: string): VideoRecordingHook 
   const scenarioRef = useRef<string | undefined>(undefined);
   const { uploadVideo } = useUploadVideo();
 
-  const handleOneMinuteRecording = useCallback(async () => {
+  const handleTimedRecording = useCallback(async () => {
     // Double-check to prevent multiple calls
     if (hasUploadedOneMinute.current) {
       return;
     }
 
-    console.log("Starting 1-minute upload process...");
+    console.log("Starting timed upload process...");
     hasUploadedOneMinute.current = true; // Set this BEFORE the upload to prevent race conditions
 
     // Create a temporary recorder to get a proper 1-minute segment
     try {
       const currentRecorder = mediaRecorderRef.current;
       if (!currentRecorder || currentRecorder.state !== "recording") {
-        console.log("No active recorder for 1-minute upload");
+        console.log("No active recorder for timed upload");
         return;
       }
 
@@ -49,22 +49,22 @@ export const useVideoRecording = (currentScenario?: string): VideoRecordingHook 
       const mimeType = currentRecorder.mimeType || "video/webm";
       const oneMinuteBlob = new Blob(oneMinuteChunksRef.current, { type: mimeType });
 
-      console.log("1-minute blob size:", oneMinuteBlob.size, "chunks:", oneMinuteChunksRef.current.length);
+      console.log("Timed blob size:", oneMinuteBlob.size, "chunks:", oneMinuteChunksRef.current.length);
 
       // Only upload if we have substantial data
       if (oneMinuteBlob.size > 50000) { // Increased threshold to 50KB
-        const scenarioToUse = scenarioRef.current || currentScenario;
+        const scenarioToUse = scenarioRef.current;
         console.log("Uploading video with scenario:", scenarioToUse);
         await uploadVideo("responding", oneMinuteBlob, scenarioToUse);
       } else {
-        console.log("Skipping 1-minute upload - insufficient data:", oneMinuteBlob.size);
+        console.log("Skipping timed upload - insufficient data:", oneMinuteBlob.size);
         hasUploadedOneMinute.current = false; // Reset so we can try again
       }
     } catch (error) {
-      console.error("Error in 1-minute upload:", error);
+      console.error("Error in timed upload:", error);
       hasUploadedOneMinute.current = false; // Reset on error
     }
-  }, [uploadVideo, currentScenario]);
+  }, [uploadVideo]);
 
   const startRecording = async (scenarioOverride?: string): Promise<void> => {
     console.log("startRecording called with scenarioOverride:", scenarioOverride);
@@ -109,18 +109,19 @@ export const useVideoRecording = (currentScenario?: string): VideoRecordingHook 
         videoBitsPerSecond: 500000, // 0.5 Mbps (reduced from 2.5 Mbps)
       });
 
-      // Set up a single timeout for the one-minute mark
-      const oneMinuteTimeout = setTimeout(() => {
+      // Set up timeout for uniform 90-second recording duration
+      const uploadDuration = RECORDING_DURATION;
+      const uploadTimeout = setTimeout(() => {
         if (!hasUploadedOneMinute.current) {
-          handleOneMinuteRecording();
+          handleTimedRecording();
         }
-      }, ONE_MINUTE);
+      }, uploadDuration);
 
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           chunksRef.current.push(event.data);
 
-          // Only store chunks for the first minute
+          // Only store chunks for the timed upload period
           if (!hasUploadedOneMinute.current) {
             oneMinuteChunksRef.current.push(event.data);
           }
@@ -128,7 +129,7 @@ export const useVideoRecording = (currentScenario?: string): VideoRecordingHook 
       };
 
       recorder.onstop = () => {
-        clearTimeout(oneMinuteTimeout); // Clean up timeout if recording stops early
+        clearTimeout(uploadTimeout); // Clean up timeout if recording stops early
         console.log("Total chunks collected:", chunksRef.current.length);
         console.log(
           "Total size of chunks:",

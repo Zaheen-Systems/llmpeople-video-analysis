@@ -163,6 +163,9 @@ interface RespondingComponentProps {
 }
 
 const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingData }) => {
+  // Add debugging to track when this component renders
+  console.log('RespondingComponent rendering with data:', respondingData);
+
   const handleTryAgain = () => {
     window.location.reload();
   };
@@ -192,8 +195,37 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
 
   // Type guard to check if it's Adam scenario data
   const isAdamData = (data: any): data is AdamRespondingData => {
-    return 'rubricEvaluation' in data;
+    return 'rubricEvaluation' in data && data.rubricEvaluation !== undefined;
   };
+
+  // Type guard to check if it's regular scenario data
+  const isRegularData = (data: any): data is RespondingData => {
+    return 'facialExpressions' in data &&
+      'soundToneOfVoice' in data &&
+      'textChoiceOfWords' in data &&
+      data.facialExpressions !== undefined &&
+      data.soundToneOfVoice !== undefined &&
+      data.textChoiceOfWords !== undefined;
+  };
+
+  // Add error handling for malformed data
+  if (!isAdamData(respondingData) && !isRegularData(respondingData)) {
+    console.error('Invalid respondingData structure:', respondingData);
+    return (
+      <Container>
+        <Title>Error: Invalid Data Structure</Title>
+        <Section>
+          <FeedbackText>
+            The response data is not in the expected format. Please try again.
+          </FeedbackText>
+          <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
+            {JSON.stringify(respondingData, null, 2)}
+          </pre>
+        </Section>
+        <TryAgainButton onClick={handleTryAgain}>Try Again</TryAgainButton>
+      </Container>
+    );
+  }
 
   if (isAdamData(respondingData)) {
     // Render Adam scenario (scenario 4) layout

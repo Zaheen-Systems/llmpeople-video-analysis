@@ -67,8 +67,18 @@ const useUploadVideo = () => {
       const responseText = await response.text();
       const result = responseText ? JSON.parse(responseText) : null;
       console.log("Result:", result);
+
       if (result !== null) {
-        setRespondingData(result.result || result);
+        const dataToSet = result.result || result;
+        console.log("Setting responding data:", dataToSet);
+
+        // Validate data structure before setting
+        if (typeof dataToSet === "object" && dataToSet !== null) {
+          setRespondingData(dataToSet);
+        } else {
+          console.error("Invalid data structure received:", dataToSet);
+          throw new Error("Invalid data structure received from server");
+        }
       } else {
         throw new Error("Empty response from server");
       }

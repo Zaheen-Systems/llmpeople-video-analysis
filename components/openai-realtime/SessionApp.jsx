@@ -24,8 +24,9 @@ export default function SessionApp({ mainStateDispatch }) {
   const [isSessionActive, setIsSessionActive] = useState(false);
   const peerConnection = useRef(null);
   const audioElement = useRef(null);
+  const microphoneStream = useRef(null);
   const { humanoidRef, uploadLoading } = useGameContext();
-  const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording(currentScenario);
+  const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
 
   const setScenario1 = () => {
     setSystemMessage(Scenario1);
@@ -45,7 +46,26 @@ export default function SessionApp({ mainStateDispatch }) {
   const setScenario4 = () => {
     setSystemMessage(scenario4);
     setCurrentScenario("4");
-    console.log("Scenario 4 selected, currentScenario set to: 4");
+  };
+
+  // Function to mute the microphone
+  const muteMicrophone = () => {
+    if (microphoneStream.current) {
+      microphoneStream.current.getAudioTracks().forEach(track => {
+        track.enabled = false;
+      });
+      console.log("Microphone muted");
+    }
+  };
+
+  // Function to unmute the microphone
+  const unmuteMicrophone = () => {
+    if (microphoneStream.current) {
+      microphoneStream.current.getAudioTracks().forEach(track => {
+        track.enabled = true;
+      });
+      console.log("Microphone unmuted");
+    }
   };
 
   useEffect(() => {
@@ -59,13 +79,7 @@ export default function SessionApp({ mainStateDispatch }) {
     console.log("events changed:", events);
   }, [events]);
 
-  async function startSession(scenarioOverride) {
-    console.log("startSession called with scenarioOverride:", scenarioOverride);
-    // Update current scenario if provided
-    if (scenarioOverride) {
-      setCurrentScenario(scenarioOverride);
-      console.log("Updated currentScenario to:", scenarioOverride);
-    }
+  async function startSession(scenarioNumber) {
     // Get an ephemeral key from the Fastify server
     let tokenResponse;
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
@@ -128,6 +142,11 @@ export default function SessionApp({ mainStateDispatch }) {
     const ms = await navigator.mediaDevices.getUserMedia({
       audio: true,
     });
+    microphoneStream.current = ms;
+
+    // Mute microphone initially during avatar introduction
+    muteMicrophone();
+
     pc.addTrack(ms.getTracks()[0]);
 
     // Set up data channel for sending and receiving events
@@ -156,9 +175,8 @@ export default function SessionApp({ mainStateDispatch }) {
     await pc.setRemoteDescription(answer);
 
     peerConnection.current = pc;
-    const scenarioForRecording = scenarioOverride || currentScenario;
-    console.log("Starting recording with scenario:", scenarioForRecording);
-    await startRecording(scenarioForRecording);
+    console.log("Starting recording with uniform 90-second duration");
+    await startRecording();
   }
 
   // Stop current session, clean up peer connection and data channel
@@ -170,6 +188,13 @@ export default function SessionApp({ mainStateDispatch }) {
     if (peerConnection.current) {
       peerConnection.current.close();
     }
+
+    // Clean up microphone stream
+    if (microphoneStream.current) {
+      microphoneStream.current.getTracks().forEach(track => track.stop());
+      microphoneStream.current = null;
+    }
+
     setDataChannel(null);
     setIsSessionActive(false);
     mainStateDispatch({ type: "SET_IS_LOADING", payload: true });
@@ -232,6 +257,29 @@ export default function SessionApp({ mainStateDispatch }) {
     sendClientEvent(event);
   }
 
+  // Send an assistant message (for the AI to speak)
+  function sendAssistantMessage(message) {
+    // First, add the assistant message to the conversation
+    const assistantEvent = {
+      type: "conversation.item.create",
+      item: {
+        type: "message",
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: message,
+          },
+        ],
+      },
+    };
+
+    sendClientEvent(assistantEvent);
+
+    // Then trigger a response to make the AI speak it
+    sendClientEvent({ type: "response.create" });
+  }
+
   // Attach event listeners to the data channel when it is created
   useEffect(() => {
     if (dataChannel) {
@@ -244,6 +292,8 @@ export default function SessionApp({ mainStateDispatch }) {
         }
         if (data.type === "output_audio_buffer.stopped") {
           humanoidRef.current.talkAnimationEnd();
+          // Unmute microphone after avatar finishes speaking
+          unmuteMicrophone();
         }
         console.log("Session App data: ", data);
         setEvents((prev) => [data, ...prev]);

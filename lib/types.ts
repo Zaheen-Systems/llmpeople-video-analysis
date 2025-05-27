@@ -42,6 +42,7 @@ export type ModelConfig = {
   idleAnimations: string[];
   talkingBodyAnimations: string[];
   positionOffset: Vector3;
+  faceTarget?: Vector3; // Optional face target position for zoom focus
 };
 export type Model = keyof typeof models;
 
@@ -83,23 +84,23 @@ export type MainStateAction =
   | { type: "TOGGLE_SETTINGS_MODAL" }
   | { type: "SET_SETTINGS"; payload: SettingsType }
   | {
-      type: "HANDLE_SOUND";
-      payload: {
-        audio: HTMLAudioElement;
-        currentSoundRef: CurrentSoundRef;
-        humanoidRef: HumanoidRef;
-      };
-    }
-  | {
-      type: "UPDATE_CHAT_STATE";
-      payload: {
-        newMessage?: ChatMessage;
-        isLoadingMessage?: boolean;
-        abortController?: AbortController;
-        errorMessage?: string;
-        textAreaValue?: string;
-      };
+    type: "HANDLE_SOUND";
+    payload: {
+      audio: HTMLAudioElement;
+      currentSoundRef: CurrentSoundRef;
+      humanoidRef: HumanoidRef;
     };
+  }
+  | {
+    type: "UPDATE_CHAT_STATE";
+    payload: {
+      newMessage?: ChatMessage;
+      isLoadingMessage?: boolean;
+      abortController?: AbortController;
+      errorMessage?: string;
+      textAreaValue?: string;
+    };
+  };
 
 export type MainStateDispatch = Dispatch<MainStateAction>;
 
