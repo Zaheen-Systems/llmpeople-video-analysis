@@ -32,11 +32,9 @@ const ChatMessages = memo(function ChatMessages({ messages }: ChatMessagesProps)
       {/* ✅ This removes both LLMMessage and UserMessage */}
       {messages.map((message, index) => (
         <div key={index} className="p-3 bg-gray-700 rounded-lg shadow-md">
-          <p>{message.content}</p>  {/* ✅ Only displays plain text */}
+          <p>{message.content}</p> {/* ✅ Only displays plain text */}
         </div>
       ))}
-
-
       <div ref={endRef} /> {/* Invisible div for auto scrolling purposes */}
     </>
   );
@@ -149,6 +147,7 @@ type ChatProps = {
 
 export const Chat = ({ mainStateDispatch, chatState, settings }: ChatProps) => {
   useInitialChatMessage(mainStateDispatch, settings);
+  return <></>;
 };
 
 const ChatWrapper = styled.div`

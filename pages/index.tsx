@@ -112,8 +112,10 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
         overflow: "hidden",
       }}
     >
-      {mainState.showRespondingComponent && !uploadLoading.current && respondingData.current &&
-        typeof respondingData.current === 'object' ? (
+      {mainState.showRespondingComponent &&
+      !uploadLoading.current &&
+      respondingData.current &&
+      typeof respondingData.current === "object" ? (
         <RespondingComponent respondingData={respondingData.current!} />
       ) : (
         <>
