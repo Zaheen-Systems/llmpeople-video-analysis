@@ -146,11 +146,13 @@ function SessionActive({ stopSession, sendTextMessage, isRecording }) {
         Submit
       </Button> */}
 
-      {(uploadLoading.current !== null || respondingData.current !== null) && (
-        <Button disabled={uploadLoading.current === true} onClick={stopSession} icon={<List height={16} />}>
-          Results
-        </Button>
-      )}
+      <Button
+        disabled={uploadLoading.current !== false || respondingData.current === null}
+        onClick={stopSession}
+        icon={<List height={16} />}
+      >
+        Results
+      </Button>
     </SessionActiveContainer>
   );
 }

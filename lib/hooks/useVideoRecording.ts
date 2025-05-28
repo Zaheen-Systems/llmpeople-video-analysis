@@ -109,8 +109,10 @@ export const useVideoRecording = (): VideoRecordingHook => {
         videoBitsPerSecond: 500000, // 0.5 Mbps (reduced from 2.5 Mbps)
       });
 
-      // Set up timeout for uniform 90-second recording duration
+      // Set up timeout for recording duration
       const uploadDuration = RECORDING_DURATION;
+      console.log(`Setting recording duration to ${uploadDuration / 1000} seconds for scenario ${scenarioOverride}`);
+
       const uploadTimeout = setTimeout(() => {
         if (!hasUploadedOneMinute.current) {
           handleTimedRecording();

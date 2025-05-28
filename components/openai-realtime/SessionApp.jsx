@@ -16,6 +16,9 @@ const ControlsSection = styled.section`
   z-index: 10;
 `;
 
+// Constants
+const LANGUAGE_ENFORCEMENT = "You must always respond in English only. Never use Spanish, Italian, or any other language. All responses must be in clear, natural English.";
+
 export default function SessionApp({ mainStateDispatch }) {
   const [systemMessage, setSystemMessage] = useState(Scenario1);
   const [currentScenario, setCurrentScenario] = useState("1");
@@ -28,25 +31,23 @@ export default function SessionApp({ mainStateDispatch }) {
   const { humanoidRef, uploadLoading } = useGameContext();
   const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
 
-  const setScenario1 = () => {
-    setSystemMessage(Scenario1);
-    setCurrentScenario("1");
+  // Scenario configurations
+  const scenarios = {
+    "1": Scenario1,
+    "2": Scenario2,
+    "3": scenario3,
+    "4": scenario4
   };
 
-  const setScenario2 = () => {
-    setSystemMessage(Scenario2);
-    setCurrentScenario("2");
+  const setScenario = (scenarioNumber) => {
+    setSystemMessage(scenarios[scenarioNumber]);
+    setCurrentScenario(scenarioNumber);
   };
 
-  const setScenario3 = () => {
-    setSystemMessage(scenario3);
-    setCurrentScenario("3");
-  };
-
-  const setScenario4 = () => {
-    setSystemMessage(scenario4);
-    setCurrentScenario("4");
-  };
+  const setScenario1 = () => setScenario("1");
+  const setScenario2 = () => setScenario("2");
+  const setScenario3 = () => setScenario("3");
+  const setScenario4 = () => setScenario("4");
 
   // Function to mute the microphone
   const muteMicrophone = () => {
@@ -65,6 +66,48 @@ export default function SessionApp({ mainStateDispatch }) {
         track.enabled = true;
       });
       console.log("Microphone unmuted");
+    }
+  };
+
+  // Function to play pre-made audio for scenario 4 introduction
+  const playIntroductionAudio = async () => {
+    try {
+      // Path to your pre-made audio file (you'll need to add this to your public folder)
+      const audioUrl = "/audio/scenario4-intro.wav"; // Updated to use the correct .wav file
+
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(audioUrl);
+
+        audio.onended = () => {
+          humanoidRef.current.talkAnimationEnd();
+          console.log("Pre-made audio introduction completed");
+          resolve();
+        };
+
+        audio.onerror = (error) => {
+          humanoidRef.current.talkAnimationEnd();
+          console.error("Error playing pre-made audio:", error);
+          reject(error);
+        };
+
+        audio.onloadstart = () => {
+          console.log("Starting to load pre-made audio...");
+        };
+
+        audio.oncanplay = () => {
+          console.log("Pre-made audio can start playing");
+          // Start avatar talking animation
+          humanoidRef.current.talkAnimationStart();
+          audio.play().catch(reject);
+        };
+
+        // Start loading the audio
+        audio.load();
+      });
+    } catch (error) {
+      console.error("Error setting up pre-made audio:", error);
+      humanoidRef.current.talkAnimationEnd();
+      throw error;
     }
   };
 
@@ -94,6 +137,8 @@ export default function SessionApp({ mainStateDispatch }) {
         body: JSON.stringify({
           model: "gpt-4o-realtime-preview-2024-12-17",
           voice: "verse",
+          modalities: ["text", "audio"],
+          instructions: LANGUAGE_ENFORCEMENT,
         }),
       });
       tokenResponse = await response.json();
@@ -113,12 +158,6 @@ export default function SessionApp({ mainStateDispatch }) {
 
     pc.ontrack = (e) => {
       console.log("Received audio track");
-
-      if (!audioElement.current) {
-        audioElement.current = document.createElement("audio");
-        audioElement.current.autoplay = true;
-        document.body.appendChild(audioElement.current); // Ensure it's part of the DOM
-      }
 
       const stream = e.streams[0];
       audioElement.current.srcObject = stream;
@@ -144,7 +183,7 @@ export default function SessionApp({ mainStateDispatch }) {
     });
     microphoneStream.current = ms;
 
-    // Mute microphone initially during avatar introduction
+    // Always mute microphone initially
     muteMicrophone();
 
     pc.addTrack(ms.getTracks()[0]);
@@ -175,8 +214,22 @@ export default function SessionApp({ mainStateDispatch }) {
     await pc.setRemoteDescription(answer);
 
     peerConnection.current = pc;
-    console.log("Starting recording with uniform 90-second duration");
-    await startRecording();
+    console.log(`Starting recording with 80 seconds duration for scenario:`, scenarioNumber);
+    await startRecording(scenarioNumber);
+
+    // For scenario 4, play introduction audio after session is established
+    if (scenarioNumber === "4") {
+      try {
+        console.log("Playing scenario 4 introduction audio...");
+        await playIntroductionAudio();
+        console.log("Audio introduction completed, unmuting microphone...");
+        unmuteMicrophone();
+      } catch (error) {
+        console.error("Failed to play introduction audio:", error);
+        // Unmute microphone even if audio fails
+        unmuteMicrophone();
+      }
+    }
   }
 
   // Stop current session, clean up peer connection and data channel
@@ -228,7 +281,7 @@ export default function SessionApp({ mainStateDispatch }) {
         content: [
           {
             type: "input_text",
-            text: message,
+            text: message + " (Please respond in English only)",
           },
         ],
       },
@@ -248,7 +301,7 @@ export default function SessionApp({ mainStateDispatch }) {
         content: [
           {
             type: "input_text",
-            text: message,
+            text: message + LANGUAGE_ENFORCEMENT,
           },
         ],
       },
@@ -256,30 +309,6 @@ export default function SessionApp({ mainStateDispatch }) {
 
     sendClientEvent(event);
   }
-
-  // Send an assistant message (for the AI to speak)
-  function sendAssistantMessage(message) {
-    // First, add the assistant message to the conversation
-    const assistantEvent = {
-      type: "conversation.item.create",
-      item: {
-        type: "message",
-        role: "assistant",
-        content: [
-          {
-            type: "text",
-            text: message,
-          },
-        ],
-      },
-    };
-
-    sendClientEvent(assistantEvent);
-
-    // Then trigger a response to make the AI speak it
-    sendClientEvent({ type: "response.create" });
-  }
-
   // Attach event listeners to the data channel when it is created
   useEffect(() => {
     if (dataChannel) {
@@ -304,8 +333,34 @@ export default function SessionApp({ mainStateDispatch }) {
       dataChannel.addEventListener("open", () => {
         setIsSessionActive(true);
         setEvents([]);
-        sendSystemMessage(systemMessage);
-        sendTextMessage("Hey There, Explain about yourself, be consice");
+
+        // First, update session to enforce English language
+        const sessionUpdateEvent = {
+          type: "session.update",
+          session: {
+            modalities: ["text", "audio"],
+            instructions: LANGUAGE_ENFORCEMENT,
+            voice: "verse",
+            input_audio_format: "pcm16",
+            output_audio_format: "pcm16",
+            input_audio_transcription: {
+              model: "whisper-1"
+            }
+          }
+        };
+        sendClientEvent(sessionUpdateEvent);
+
+        if (currentScenario === "4") {
+          // For scenario 4, send the role rule and unmute after audio completes
+          sendSystemMessage(scenario4);
+          // Note: microphone will be unmuted after the introduction audio completes
+          console.log("Scenario 4 session ready, waiting for introduction audio to complete...");
+        } else {
+          // For scenarios 1-3, send system message and auto-start (mic stays muted until avatar finishes)
+          sendSystemMessage(systemMessage);
+          sendTextMessage("Hey there! Could you introduce yourself briefly?");
+          console.log(`Scenario ${currentScenario} session ready, mic will unmute after avatar's first message`);
+        }
       });
     }
   }, [dataChannel]);
