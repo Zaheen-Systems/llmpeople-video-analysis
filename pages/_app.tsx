@@ -12,7 +12,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>llmpeople</title>
+        <title>Vira</title>
         <meta name="description" content="Interact with 3d models powered by llms" />
         {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
