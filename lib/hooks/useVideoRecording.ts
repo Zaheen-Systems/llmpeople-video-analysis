@@ -8,7 +8,7 @@ interface VideoRecordingHook {
   error: string | null;
 }
 
-const RECORDING_DURATION = 80000; // 80 seconds in milliseconds
+const RECORDING_DURATION = 90000; // 90 seconds in milliseconds
 
 export const useVideoRecording = (): VideoRecordingHook => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
