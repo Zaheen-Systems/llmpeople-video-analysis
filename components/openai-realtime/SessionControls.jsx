@@ -50,7 +50,7 @@ const SessionActiveContainer = styled.div`
   z-index: 100000;
 `;
 
-function SessionStopped({ startSession, scenario1, scenario2, scenario3, scenario4 }) {
+function SessionStopped({ startSession, scenario1, scenario2, scenario3, scenario4, scenario5 }) {
   const [isActivating, setIsActivating] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState(null);
 
@@ -95,7 +95,15 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3, scenari
             $isActive={isActivating && selectedScenario === 4}
             icon={<CloudLightning height={16} />}
           >
-            Roleplay
+            Roleplay 1
+          </ScenarioButton>
+
+          <ScenarioButton
+            onClick={() => handleStartSession(5, scenario5)}
+            $isActive={isActivating && selectedScenario === 5}
+            icon={<CloudLightning height={16} />}
+          >
+            Roleplay 2
           </ScenarioButton>
         </>
       ) : (
@@ -108,7 +116,11 @@ function SessionStopped({ startSession, scenario1, scenario2, scenario3, scenari
                 ? "Sales Coach"
                 : selectedScenario === 3
                   ? "Customer Service Coach"
-                  : "Roleplay Coach"}
+                  : selectedScenario === 4
+                    ? "Roleplay 1"
+                    : selectedScenario === 5
+                      ? "Roleplay 2"
+                      : "Roleplay Coach"}
         </ScenarioButton>
       )}
     </SessionStoppedContainer>
@@ -176,6 +188,7 @@ export default function SessionControls({
   scenario2,
   scenario3,
   scenario4,
+  scenario5,
   isRecording,
 }) {
   return (
@@ -195,6 +208,7 @@ export default function SessionControls({
           scenario2={scenario2}
           scenario3={scenario3}
           scenario4={scenario4}
+          scenario5={scenario5}
         />
       )}
     </Container>
