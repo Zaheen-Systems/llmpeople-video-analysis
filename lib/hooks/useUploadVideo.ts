@@ -52,7 +52,7 @@ const useUploadVideo = () => {
       }
 
       console.log("Uploading video...");
-      const response = await fetch("https://vira.zaheen.ai/run_ai_activity", {
+      const response = await fetch("http://localhost:8000/run_ai_activity", {
         method: "POST",
         headers: {
           Accept: "application/json",
