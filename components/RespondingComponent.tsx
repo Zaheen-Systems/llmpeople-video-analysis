@@ -156,15 +156,40 @@ interface AdamRespondingData {
   suggestionsForImprovement: string;
 }
 
+interface BenRubricEvaluation {
+  feedbackonworkperformance: { score: number; explanation: string };
+  problemsolvingandactionplanning: { score: number; explanation: string };
+  empathyandaccountability: { score: number; explanation: string };
+  careerguidance: { score: number; explanation: string };
+  emotionalsensitivityandconversationmanagement: { score: number; explanation: string };
+  listeningandverbalcommunication: { score: number; explanation: string };
+  facialexpressions: { score: number; explanation: string };
+  toneofvoice: { score: number; explanation: string };
+  bodylanguageandposture: { score: number; explanation: string };
+  responsivenesstoemotionalcues: { score: number; explanation: string };
+}
+
+interface BenRespondingData {
+  rubricEvaluation: BenRubricEvaluation;
+  totalScore: number;
+  scoreInterpretation: string;
+  suggestionsForImprovement: string;
+}
+
+interface RubricEvaluation {
+  rubricEvaluation: BenRubricEvaluation | AdamRubricEvaluation;
+}
+
 // Update the main interface to handle both types
 interface RespondingComponentProps {
-  respondingData: RespondingData | AdamRespondingData;
+  respondingData: RespondingData | AdamRespondingData | BenRespondingData;
   scenario?: string;
 }
 
-const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingData }) => {
+const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingData, scenario }) => {
   // Add debugging to track when this component renders
   console.log('RespondingComponent rendering with data:', respondingData);
+  console.log('RespondingComponent rendering with scenario:', scenario);
 
   const handleTryAgain = () => {
     window.location.reload();
@@ -195,7 +220,16 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
 
   // Type guard to check if it's Adam scenario data
   const isAdamData = (data: any): data is AdamRespondingData => {
-    return 'rubricEvaluation' in data && data.rubricEvaluation !== undefined;
+    return 'rubricEvaluation' in data &&
+      data.rubricEvaluation !== undefined &&
+      'empathyAndEmotionalSensitivity' in data.rubricEvaluation;
+  };
+
+  // Type guard to check if it's Ben scenario data (scenario 5)
+  const isBenData = (data: any): data is BenRespondingData => {
+    return 'rubricEvaluation' in data &&
+      data.rubricEvaluation !== undefined &&
+      'feedbackonworkperformance' in data.rubricEvaluation;
   };
 
   // Type guard to check if it's regular scenario data
@@ -209,7 +243,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
   };
 
   // Add error handling for malformed data
-  if (!isAdamData(respondingData) && !isRegularData(respondingData)) {
+  if (!isAdamData(respondingData) && !isBenData(respondingData) && !isRegularData(respondingData)) {
     console.error('Invalid respondingData structure:', respondingData);
     return (
       <Container>
@@ -263,6 +297,78 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
         {/* Total Score */}
         <Section>
           <StrongText>Total Score:</StrongText> {respondingData.totalScore}/25 ({respondingData.scoreInterpretation})
+        </Section>
+
+        {/* Suggestions */}
+        <Section>
+          <FeedbackText>
+            <StrongText>Suggestions for Improvement:</StrongText>{" "}
+            {respondingData.suggestionsForImprovement}
+          </FeedbackText>
+        </Section>
+
+        {/* Try Again Button */}
+        <TryAgainButton onClick={handleTryAgain}>Try Again</TryAgainButton>
+      </Container>
+    );
+  }
+
+  if (isBenData(respondingData)) {
+    // Render Ben scenario (scenario 5) layout
+    return (
+      <Container>
+        <Title>Here is how you did</Title>
+
+        {/* Rubric Evaluation */}
+        <Section>
+          <SectionTitle>Evaluation Rubric</SectionTitle>
+          <List>
+            {renderRubricItem(
+              "Feedback on Work Performance",
+              respondingData.rubricEvaluation.feedbackonworkperformance
+            )}
+            {renderRubricItem(
+              "Problem Solving and Action Planning",
+              respondingData.rubricEvaluation.problemsolvingandactionplanning
+            )}
+            {renderRubricItem(
+              "Empathy and Accountability",
+              respondingData.rubricEvaluation.empathyandaccountability
+            )}
+            {renderRubricItem(
+              "Career Guidance",
+              respondingData.rubricEvaluation.careerguidance
+            )}
+            {renderRubricItem(
+              "Emotional Sensitivity and Conversation Management",
+              respondingData.rubricEvaluation.emotionalsensitivityandconversationmanagement
+            )}
+            {renderRubricItem(
+              "Listening and Verbal Communication",
+              respondingData.rubricEvaluation.listeningandverbalcommunication
+            )}
+            {renderRubricItem(
+              "Facial Expressions",
+              respondingData.rubricEvaluation.facialexpressions
+            )}
+            {renderRubricItem(
+              "Tone of Voice",
+              respondingData.rubricEvaluation.toneofvoice
+            )}
+            {renderRubricItem(
+              "Body Language and Posture",
+              respondingData.rubricEvaluation.bodylanguageandposture
+            )}
+            {renderRubricItem(
+              "Responsiveness to Emotional Cues",
+              respondingData.rubricEvaluation.responsivenesstoemotionalcues
+            )}
+          </List>
+        </Section>
+
+        {/* Total Score */}
+        <Section>
+          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/50 ({respondingData.scoreInterpretation})
         </Section>
 
         {/* Suggestions */}
