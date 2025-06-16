@@ -94,7 +94,7 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
     mainStateReducer,
     defaultState
   );
-  const { respondingData, uploadLoading } = useGameContext();
+  const { respondingData, uploadLoading, currentScenario } = useGameContext();
   useGetInitialSettings(mainStateDispatch, mainState.settings);
 
   if (mainState.initErrorMessage.includes("WebGL not supported")) {
@@ -114,7 +114,7 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
     >
       {mainState.showRespondingComponent && !uploadLoading.current && respondingData.current &&
         typeof respondingData.current === 'object' ? (
-        <RespondingComponent respondingData={respondingData.current!} />
+        <RespondingComponent respondingData={respondingData.current!} scenario={currentScenario.current || undefined} />
       ) : (
         <>
           <Loading isLoading={mainState.isLoading} />
