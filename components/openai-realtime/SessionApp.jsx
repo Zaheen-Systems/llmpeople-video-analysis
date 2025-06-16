@@ -1,5 +1,5 @@
 import { useGameContext } from "@/components/GameContextProvider";
-import { Scenario1, Scenario2, scenario3, scenario4 } from "@/lib/constants";
+import { Scenario1, Scenario2, scenario3, scenario4, scenario5 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -28,7 +28,7 @@ export default function SessionApp({ mainStateDispatch }) {
   const peerConnection = useRef(null);
   const audioElement = useRef(null);
   const microphoneStream = useRef(null);
-  const { humanoidRef, uploadLoading } = useGameContext();
+  const { humanoidRef, uploadLoading, setCurrentScenario: setGameContextScenario } = useGameContext();
   const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
 
   // Scenario configurations
@@ -36,7 +36,8 @@ export default function SessionApp({ mainStateDispatch }) {
     "1": Scenario1,
     "2": Scenario2,
     "3": scenario3,
-    "4": scenario4
+    "4": scenario4,
+    "5": scenario5
   };
 
   const setScenario = (scenarioNumber) => {
@@ -48,6 +49,7 @@ export default function SessionApp({ mainStateDispatch }) {
   const setScenario2 = () => setScenario("2");
   const setScenario3 = () => setScenario("3");
   const setScenario4 = () => setScenario("4");
+  const setScenario5 = () => setScenario("5");
 
   // Function to mute the microphone
   const muteMicrophone = () => {
@@ -123,6 +125,9 @@ export default function SessionApp({ mainStateDispatch }) {
   }, [events]);
 
   async function startSession(scenarioNumber) {
+    // Store the active scenario in GameContext for use in RespondingComponent
+    setGameContextScenario(scenarioNumber);
+
     // Get an ephemeral key from the Fastify server
     let tokenResponse;
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
@@ -214,22 +219,22 @@ export default function SessionApp({ mainStateDispatch }) {
     await pc.setRemoteDescription(answer);
 
     peerConnection.current = pc;
-    console.log(`Starting recording with 80 seconds duration for scenario:`, scenarioNumber);
+    console.log(`Starting recording with 90 seconds duration for scenario:`, scenarioNumber);
     await startRecording(scenarioNumber);
 
     // For scenario 4, play introduction audio after session is established
-    if (scenarioNumber === "4") {
-      try {
-        console.log("Playing scenario 4 introduction audio...");
-        await playIntroductionAudio();
-        console.log("Audio introduction completed, unmuting microphone...");
-        unmuteMicrophone();
-      } catch (error) {
-        console.error("Failed to play introduction audio:", error);
-        // Unmute microphone even if audio fails
-        unmuteMicrophone();
-      }
-    }
+    // if (scenarioNumber === "4") {
+    //   try {
+    //     console.log("Playing scenario 4 introduction audio...");
+    //     await playIntroductionAudio();
+    //     console.log("Audio introduction completed, unmuting microphone...");
+    //     unmuteMicrophone();
+    //   } catch (error) {
+    //     console.error("Failed to play introduction audio:", error);
+    //     // Unmute microphone even if audio fails
+    //     unmuteMicrophone();
+    //   }
+    // }
   }
 
   // Stop current session, clean up peer connection and data channel
@@ -350,11 +355,19 @@ export default function SessionApp({ mainStateDispatch }) {
         };
         sendClientEvent(sessionUpdateEvent);
 
+        console.log("Data channel opened for scenario:", currentScenario);
+
         if (currentScenario === "4") {
           // For scenario 4, send the role rule and unmute after audio completes
-          sendSystemMessage(scenario4);
+          sendSystemMessage(systemMessage + "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response.");
+          sendTextMessage("Begin the roleplay now.");
           // Note: microphone will be unmuted after the introduction audio completes
           console.log("Scenario 4 session ready, waiting for introduction audio to complete...");
+        } else if (currentScenario === "5") {
+          // For scenario 5, modify system message to include opening line
+          sendSystemMessage(systemMessage + "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response.");
+          sendTextMessage("Begin the roleplay now.");
+          console.log("Scenario 5 session ready with modified system message");
         } else {
           // For scenarios 1-3, send system message and auto-start (mic stays muted until avatar finishes)
           sendSystemMessage(systemMessage);
@@ -363,7 +376,7 @@ export default function SessionApp({ mainStateDispatch }) {
         }
       });
     }
-  }, [dataChannel]);
+  }, [dataChannel, currentScenario]);
 
   return (
     <>
@@ -380,6 +393,7 @@ export default function SessionApp({ mainStateDispatch }) {
           scenario2={setScenario2}
           scenario3={setScenario3}
           scenario4={setScenario4}
+          scenario5={setScenario5}
         />
       </ControlsSection>
     </>
