@@ -9,9 +9,11 @@ type GameContext = {
   uploadLoading: React.MutableRefObject<boolean | null>;
   uploadError: string | null;
   respondingData: React.MutableRefObject<RespondingData | null>;
+  currentScenario: React.MutableRefObject<string | null>;
   setUploadLoading: (loading: boolean | null) => void;
   setUploadError: (error: string | null) => void;
   setRespondingData: (data: RespondingData | null) => void;
+  setCurrentScenario: (scenario: string | null) => void;
 };
 
 const defaultGameContext: GameContext = {
@@ -20,9 +22,11 @@ const defaultGameContext: GameContext = {
   uploadLoading: { current: null },
   uploadError: null,
   respondingData: { current: null },
-  setUploadLoading: () => {},
-  setUploadError: () => {},
-  setRespondingData: () => {},
+  currentScenario: { current: null },
+  setUploadLoading: () => { },
+  setUploadError: () => { },
+  setRespondingData: () => { },
+  setCurrentScenario: () => { },
 };
 
 export const GameContextContext = createContext<GameContext>(defaultGameContext);
@@ -41,6 +45,7 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({ childr
   const uploadLoading = useRef<boolean | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const respondingData = useRef<RespondingData | null>(null);
+  const currentScenario = useRef<string | null>(null);
 
   const setUploadLoading = (loading: boolean | null) => {
     uploadLoading.current = loading;
@@ -50,15 +55,21 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({ childr
     respondingData.current = data;
   };
 
+  const setCurrentScenario = (scenario: string | null) => {
+    currentScenario.current = scenario;
+  };
+
   const value = {
     humanoidRef,
     currentSoundRef,
     uploadLoading,
     uploadError,
     respondingData,
+    currentScenario,
     setUploadLoading,
     setUploadError,
     setRespondingData,
+    setCurrentScenario,
   };
 
   return <GameContextContext.Provider value={value}>{children}</GameContextContext.Provider>;
