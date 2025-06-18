@@ -23,66 +23,63 @@ export const DEFAULT_VOICE = "en-US-Neural2-H";
 export const DEFAULT_MODEL: Model = "avatar10";
 
 export const defaultCameraConfig: CameraConfig = {
-   alpha: Math.PI / 2,
-   beta: Math.PI / 2.5,
-   radius: 2.5,
-   target: v3(0, 0.7, 0),
+  alpha: Math.PI / 2,
+  beta: Math.PI / 2.5,
+  radius: 2.5,
+  target: v3(0, 0.7, 0),
 };
 
 export const NewCameraConfig: CameraConfig = {
-   alpha: Math.PI / 2,
-   beta: Math.PI / 2,
-   radius: 4,
-   target: v3(0, 1.5, 0),
+  alpha: Math.PI / 2,
+  beta: Math.PI / 2,
+  radius: 4,
+  target: v3(0, 1.5, 0),
 };
 
-
 const defaultConfig: ModelConfig = {
-   cameraConfig: defaultCameraConfig,
-   voice: "en-US-Neural2-H",
-   initialAnimation: "idle3_hand_hips",
-   faceMeshName: "Face",
-   morphTargets: {
-      mouthMovement: "Face.M_F00_000_00_Fcl_MTH_A",
-      leftEyeClose: "Face.M_F00_000_00_Fcl_EYE_Close_L",
-      rightEyeClose: "Face.M_F00_000_00_Fcl_EYE_Close_R",
-   },
-   idleAnimations: ["idle1", "idle2", "idle3_hand_hips"],
-   talkingBodyAnimations: ["talking1", "talking2_head_shake", "talking3"],
-   positionOffset: v3(0, 0.015, 0),
+  cameraConfig: defaultCameraConfig,
+  voice: "en-US-Neural2-H",
+  initialAnimation: "idle3_hand_hips",
+  faceMeshName: "Face",
+  morphTargets: {
+    mouthMovement: "Face.M_F00_000_00_Fcl_MTH_A",
+    leftEyeClose: "Face.M_F00_000_00_Fcl_EYE_Close_L",
+    rightEyeClose: "Face.M_F00_000_00_Fcl_EYE_Close_R",
+  },
+  idleAnimations: ["idle1", "idle2", "idle3_hand_hips"],
+  talkingBodyAnimations: ["talking1", "talking2_head_shake", "talking3"],
+  positionOffset: v3(0, 0.015, 0),
 };
 
 const avatar_expConfig: ModelConfig = {
-   cameraConfig: defaultCameraConfig,
-   voice: "en-US-Neural2-H",
-   initialAnimation: "Armature|Armature|IdleV4.2(maya_head)",
-   idleAnimations: ["Armature|Armature|IdleV4.2(maya_head)"],//, "idle2", "idle3_hand_hips"],
-   talkingBodyAnimations: ["Armature|mixamo.com|Layer0"],//, "talking2_head_shake", "talking3"],
-   faceMeshName: "avaturn_body",
-   morphTargets: {
-      mouthMovement: "mouth_open",
-   },
+  cameraConfig: defaultCameraConfig,
+  voice: "en-US-Neural2-H",
+  initialAnimation: "Armature|Armature|IdleV4.2(maya_head)",
+  idleAnimations: ["Armature|Armature|IdleV4.2(maya_head)"], //, "idle2", "idle3_hand_hips"],
+  talkingBodyAnimations: ["Armature|mixamo.com|Layer0"], //, "talking2_head_shake", "talking3"],
+  faceMeshName: "avaturn_body",
+  morphTargets: {
+    mouthMovement: "mouth_open",
+  },
 
-   positionOffset: v3(0, 0.015, 0),
+  positionOffset: v3(0, 0.015, 0),
 };
 
 const avatar10_expConfig: ModelConfig = {
-   cameraConfig: NewCameraConfig,
-   voice: "en-US-Neural2-H",
-   initialAnimation: "idol3",
-   idleAnimations: ["idol3"],//, "idle2", "idle3_hand_hips"],
-   talkingBodyAnimations: ["Talking 3", "talking2"],
-   faceMeshName: "avaturn_face",
-   morphTargets: {
-      mouthMovement: "mouth A",
-      leftEyeClose: "Left eye",
-      rightEyeClose: "Right eye",
-   },
+  cameraConfig: NewCameraConfig,
+  voice: "en-US-Neural2-H",
+  initialAnimation: "idol3",
+  idleAnimations: ["idol3"], //, "idle2", "idle3_hand_hips"],
+  talkingBodyAnimations: ["Talking 3", "talking2"],
+  faceMeshName: "avaturn_face",
+  morphTargets: {
+    mouthMovement: "mouth A",
+    leftEyeClose: "Left eye",
+    rightEyeClose: "Right eye",
+  },
 
-   positionOffset: v3(0, 0.015, 0),
+  positionOffset: v3(0, 0.015, 0),
 };
-
-
 
 export const Scenario1 = `You are a helpful English language assistant whose goal is to help users improve their English skills in a friendly and conversational manner. Your session follows a question‑and‑answer format to keep the user engaged. You will ask exactly one question at a time, wait for the user's response, then use their answers to develop and refine a personalized learning plan.
 
@@ -115,7 +112,6 @@ Always ask just one question at a time and build the plan based solely on the us
  
 Now begin with your one-line introduction and the first question.
 `;
-
 
 export const Scenario2 = `You are an expert AI Sales Assistant whose goal is to help users improve their sales skills through an interactive, conversational, and personalized Q&A process.  
 
@@ -287,21 +283,21 @@ Respond naturally, stay emotionally real, and do not explain the roleplay setup 
 `;
 
 export const models = {
-   avatar3_new: avatar_expConfig,
+  avatar3_new: avatar_expConfig,
 
-   avatar10: avatar10_expConfig,
-   vest_dude: {
-      ...defaultConfig,
-      morphTargets: {
-         mouthMovement: "mouth_open",
-      },
-      faceMeshName: "rp_eric_rigged_001_geo",
-      cameraConfig: {
-         alpha: Math.PI / 2,
-         beta: Math.PI / 2.5,
-         radius: 3,
-         target: v3(0, 0.9, 0),
-      },
-      positionOffset: v3(0, 0.03, 0),
-   },
+  avatar10: avatar10_expConfig,
+  vest_dude: {
+    ...defaultConfig,
+    morphTargets: {
+      mouthMovement: "mouth_open",
+    },
+    faceMeshName: "rp_eric_rigged_001_geo",
+    cameraConfig: {
+      alpha: Math.PI / 2,
+      beta: Math.PI / 2.5,
+      radius: 3,
+      target: v3(0, 0.9, 0),
+    },
+    positionOffset: v3(0, 0.03, 0),
+  },
 } as const;
