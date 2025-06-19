@@ -1,7 +1,7 @@
 import { useGameContext } from "@/components/GameContextProvider";
 import { Loading } from "@/components/Loading";
+import PermissionHandler from "@/components/PermissionHandler";
 import RespondingComponent from "@/components/RespondingComponent";
-import { Volume } from "@/components/Volume";
 import { WebGLNotSupported } from "@/components/WebGLErrors";
 import { Chat } from "@/components/chat/Chat.client";
 import { useGetInitialSettings } from "@/components/hooks";
@@ -85,9 +85,9 @@ const CanvasThatDoesNotReRender = React.memo(function CanvasThatDoesNotReRender(
   );
 });
 
-type GameProps = {
+interface GameProps {
   hasGoogleApiKey: boolean;
-};
+}
 
 const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
   const [mainState, mainStateDispatch] = useImmerReducer<MainState, MainStateAction>(
@@ -110,11 +110,18 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
         height: "100vh",
         width: "100vw",
         overflow: "hidden",
+        touchAction: "none", // Prevent unwanted touch actions on mobile
       }}
     >
-      {mainState.showRespondingComponent && !uploadLoading.current && respondingData.current &&
-        typeof respondingData.current === 'object' ? (
-        <RespondingComponent respondingData={respondingData.current!} scenario={currentScenario.current || undefined} />
+      <PermissionHandler />
+      {mainState.showRespondingComponent &&
+      !uploadLoading.current &&
+      respondingData.current &&
+      typeof respondingData.current === "object" ? (
+        <RespondingComponent
+          respondingData={respondingData.current!}
+          scenario={currentScenario.current || undefined}
+        />
       ) : (
         <>
           <Loading isLoading={mainState.isLoading} />
@@ -127,17 +134,13 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
               position: "relative",
             }}
           >
-            {/* {!mainState.isLoading && (
-          <> */}
-
-            <TopCornerButtons>
+            {/* <TopCornerButtons>
               <Volume
                 mainStateDispatch={mainStateDispatch}
                 isVolumeOn={mainState.soundController.isVolumeOn}
               />
-            </TopCornerButtons>
+            </TopCornerButtons> */}
 
-            {/* Top-right Logo */}
             <TopRightLogo>
               <img src="/Logo_white.png" alt="Logo" />
             </TopRightLogo>
@@ -147,9 +150,6 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
               chatState={mainState.chatState}
               settings={mainState.settings}
             />
-
-            {/* </>
-        )} */}
 
             {showCanvas && (
               <CanvasThatDoesNotReRender
@@ -169,13 +169,40 @@ const TopCornerButtons = styled.div`
   position: fixed;
   top: 12px;
   left: 15px;
-
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-
+  justify-content: flex-start;
+  gap: 16px;
   z-index: 100000;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  padding: 10px 14px;
+  border-radius: 16px;
+  min-width: 120px;
+  min-height: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  @media (max-width: 768px) {
+    top: 10px;
+    left: 10px;
+    gap: 18px;
+    padding: 10px 14px;
+    min-width: 140px;
+    min-height: 54px;
+    flex-direction: row;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  > * {
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
 const TopRightLogo = styled.div`
@@ -186,6 +213,9 @@ const TopRightLogo = styled.div`
 
   img {
     height: 125px;
+    @media (max-width: 768px) {
+      height: 80px;
+    }
   }
 `;
 
@@ -198,6 +228,5 @@ export async function getStaticProps() {
     props: {
       hasGoogleApiKey,
     },
-    // revalidate: 10,
   };
 }
