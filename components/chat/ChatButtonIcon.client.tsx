@@ -4,21 +4,23 @@ import styled from "styled-components";
 type ChatButtonIconProps = {
   isLoadingMessage: boolean;
   hasText: boolean;
-}
+};
 
 export const ChatButtonIcon = ({ isLoadingMessage, hasText }: ChatButtonIconProps) => {
   const iconSize = 22;
 
   if (isLoadingMessage) {
-    return (<LoaderWrapper>
-      <Loader2 size={iconSize} />
-    </LoaderWrapper>);
+    return (
+      <LoaderWrapper>
+        <Loader2 size={iconSize} />
+      </LoaderWrapper>
+    );
   } else if (hasText) {
     return <CustomSendIcon size={iconSize} />;
   } else {
     return <CustomMicIcon size={iconSize} />;
   }
-}
+};
 
 const LoaderWrapper = styled.div`
   display: flex;
