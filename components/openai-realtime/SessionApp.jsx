@@ -1,9 +1,9 @@
 import { useGameContext } from "@/components/GameContextProvider";
 import { Scenario1, Scenario2, scenario3, scenario4, scenario5 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
-import { useEffect, useRef, useState } from "react";
+import { Headphones, Languages, User, Users } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import SessionControls from "./SessionControls";
 
 const ControlsSection = styled.section`
   position: absolute;
@@ -16,8 +16,208 @@ const ControlsSection = styled.section`
   z-index: 10;
 `;
 
+// Modal styles
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200000;
+`;
+const ModalBox = styled.div`
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 36px 32px 28px 32px;
+  min-width: 320px;
+  max-width: 90vw;
+  text-align: center;
+  @media (max-width: 600px) {
+    min-width: 90vw;
+    padding: 18px 8px 16px 8px;
+    font-size: 0.98rem;
+  }
+`;
+const ModalTitle = styled.div`
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+`;
+const ModalButton = styled.button`
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 18px;
+  cursor: pointer;
+  transition: background 0.18s;
+  &:hover {
+    background: #16a34a;
+  }
+  @media (max-width: 600px) {
+    padding: 10px 18px;
+    font-size: 1rem;
+  }
+`;
+
+// Sidebar styles
+const Sidebar = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: ${(props) => (props.$collapsed ? "60px" : "260px")};
+  background: #fff;
+  border-right: 2px solid #e5e7eb;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+  z-index: 100001;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: width 0.2s;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  &:hover {
+    background: #f3f4f6;
+  }
+  @media (max-width: 600px) {
+    width: ${(props) => (props.$collapsed ? "44px" : "160px")};
+  }
+`;
+const SidebarTitle = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 24px 0 16px 0;
+  color: #222;
+  letter-spacing: 0.5px;
+  display: ${(props) => (props.$collapsed ? "none" : "block")};
+  text-align: center;
+  width: 100%;
+  @media (max-width: 600px) {
+    font-size: 1.1rem;
+    padding: 16px 0 10px 0;
+  }
+`;
+const SidebarButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: center;
+  padding-left: 0;
+`;
+const ScenarioButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${(props) => (props.$collapsed ? "0" : "12px")};
+  width: ${(props) => (props.$collapsed ? "44px" : "90%")};
+  height: 44px;
+  margin: 0;
+  padding: 0 0 0 16px;
+  border: none;
+  border-radius: 24px;
+  background: ${(props) => (props.$active ? "#e0e7ff" : "transparent")};
+  color: ${(props) => (props.$active ? "#3730a3" : "#222")};
+  font-weight: 500;
+  font-size: 1.08rem;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  transition: background 0.2s, color 0.2s;
+  justify-content: flex-start;
+  border-left: none;
+  min-height: 44px;
+  min-width: 44px;
+  text-align: left;
+  &:hover {
+    background: #f1f5ff;
+    color: #3730a3;
+  }
+  @media (max-width: 600px) {
+    width: ${(props) => (props.$collapsed ? "36px" : "100%")};
+    height: 36px;
+    min-height: 36px;
+    min-width: 36px;
+    font-size: 0.95rem;
+    border-radius: 18px;
+    padding: 0 0 0 8px;
+  }
+`;
+const ScenarioButtonText = styled.span`
+  display: ${(props) => (props.$collapsed ? "none" : "inline")};
+  margin-left: 16px;
+  font-size: 1.08rem;
+  font-weight: 500;
+  text-align: left;
+  @media (max-width: 600px) {
+    font-size: 0.95rem;
+    margin-left: 8px;
+  }
+`;
+const IconWrapper = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  font-size: 1.3rem;
+  @media (max-width: 600px) {
+    min-width: 22px;
+    font-size: 1.1rem;
+  }
+`;
+
 // Constants
-const LANGUAGE_ENFORCEMENT = "You must always respond in English only. Never use Spanish, Italian, or any other language. All responses must be in clear, natural English.";
+const LANGUAGE_ENFORCEMENT =
+  "You must always respond in English only. Never use Spanish, Italian, or any other language. All responses must be in clear, natural English.";
+
+const FloatingResultsButton = styled.button`
+  position: fixed;
+  left: 50%;
+  bottom: 36px;
+  transform: translateX(-50%);
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 300000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.18s;
+  &:hover {
+    background: #1d4ed8;
+  }
+  @media (max-width: 600px) {
+    padding: 10px 18px;
+    font-size: 1rem;
+    bottom: 16px;
+  }
+  @media (max-width: 400px) {
+    padding: 8px 8px;
+    font-size: 0.95rem;
+    bottom: 8px;
+  }
+`;
+
+// Add placeholder scenario constants for 6 and 7
+const scenario6 = "Roleplay 3 instructions.";
+const scenario7 = "Roleplay 4 instructions.";
 
 export default function SessionApp({ mainStateDispatch }) {
   const [systemMessage, setSystemMessage] = useState(Scenario1);
@@ -28,16 +228,28 @@ export default function SessionApp({ mainStateDispatch }) {
   const peerConnection = useRef(null);
   const audioElement = useRef(null);
   const microphoneStream = useRef(null);
-  const { humanoidRef, uploadLoading, setCurrentScenario: setGameContextScenario } = useGameContext();
+  const {
+    humanoidRef,
+    uploadLoading,
+    setCurrentScenario: setGameContextScenario,
+    respondingData,
+  } = useGameContext();
   const { startRecording, stopRecording, isRecording, error: recordingError } = useVideoRecording();
+  // SSR-safe sidebar collapsed state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [pendingScenario, setPendingScenario] = React.useState(null);
+  const [showSideBar, setShowSideBar] = useState(true);
 
   // Scenario configurations
   const scenarios = {
-    "1": Scenario1,
-    "2": Scenario2,
-    "3": scenario3,
-    "4": scenario4,
-    "5": scenario5
+    1: Scenario1,
+    2: Scenario2,
+    3: scenario3,
+    4: scenario4,
+    5: scenario5,
+    6: scenario6,
+    7: scenario7,
   };
 
   const setScenario = (scenarioNumber) => {
@@ -50,11 +262,13 @@ export default function SessionApp({ mainStateDispatch }) {
   const setScenario3 = () => setScenario("3");
   const setScenario4 = () => setScenario("4");
   const setScenario5 = () => setScenario("5");
+  const setScenario6 = () => setScenario("6");
+  const setScenario7 = () => setScenario("7");
 
   // Function to mute the microphone
   const muteMicrophone = () => {
     if (microphoneStream.current) {
-      microphoneStream.current.getAudioTracks().forEach(track => {
+      microphoneStream.current.getAudioTracks().forEach((track) => {
         track.enabled = false;
       });
       console.log("Microphone muted");
@@ -64,7 +278,7 @@ export default function SessionApp({ mainStateDispatch }) {
   // Function to unmute the microphone
   const unmuteMicrophone = () => {
     if (microphoneStream.current) {
-      microphoneStream.current.getAudioTracks().forEach(track => {
+      microphoneStream.current.getAudioTracks().forEach((track) => {
         track.enabled = true;
       });
       console.log("Microphone unmuted");
@@ -249,7 +463,7 @@ export default function SessionApp({ mainStateDispatch }) {
 
     // Clean up microphone stream
     if (microphoneStream.current) {
-      microphoneStream.current.getTracks().forEach(track => track.stop());
+      microphoneStream.current.getTracks().forEach((track) => track.stop());
       microphoneStream.current = null;
     }
 
@@ -349,9 +563,9 @@ export default function SessionApp({ mainStateDispatch }) {
             input_audio_format: "pcm16",
             output_audio_format: "pcm16",
             input_audio_transcription: {
-              model: "whisper-1"
-            }
-          }
+              model: "whisper-1",
+            },
+          },
         };
         sendClientEvent(sessionUpdateEvent);
 
@@ -359,43 +573,213 @@ export default function SessionApp({ mainStateDispatch }) {
 
         if (currentScenario === "4") {
           // For scenario 4, send the role rule and unmute after audio completes
-          sendSystemMessage(systemMessage + "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response.");
+          sendSystemMessage(
+            systemMessage +
+              "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response."
+          );
           sendTextMessage("Begin the roleplay now.");
           // Note: microphone will be unmuted after the introduction audio completes
           console.log("Scenario 4 session ready, waiting for introduction audio to complete...");
         } else if (currentScenario === "5") {
           // For scenario 5, modify system message to include opening line
-          sendSystemMessage(systemMessage + "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response.");
+          sendSystemMessage(
+            systemMessage +
+              "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response."
+          );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 5 session ready with modified system message");
         } else {
           // For scenarios 1-3, send system message and auto-start (mic stays muted until avatar finishes)
           sendSystemMessage(systemMessage);
           sendTextMessage("Hey there! Could you introduce yourself briefly?");
-          console.log(`Scenario ${currentScenario} session ready, mic will unmute after avatar's first message`);
+          console.log(
+            `Scenario ${currentScenario} session ready, mic will unmute after avatar's first message`
+          );
         }
       });
     }
   }, [dataChannel, currentScenario]);
 
+  // Handler for sidebar click (ignores clicks on scenario buttons)
+  function handleSidebarClick(e) {
+    // If the click is on a scenario button or its child, do not toggle
+    if (e.target.closest("[data-scenario-button]")) return;
+    setSidebarCollapsed((c) => !c);
+  }
+
+  function handleScenarioClick(scenarioNumber, setScenarioFn) {
+    setPendingScenario({ scenarioNumber, setScenarioFn });
+    setShowModal(true);
+  }
+  function handleStartSession() {
+    if (pendingScenario) {
+      pendingScenario.setScenarioFn();
+      startSession(pendingScenario.scenarioNumber);
+      setShowModal(false);
+      setShowSideBar(false);
+      setPendingScenario(null);
+    }
+  }
+
   return (
     <>
-      <ControlsSection>
-        <SessionControls
-          startSession={startSession}
-          stopSession={stopSession}
-          sendClientEvent={sendClientEvent}
-          sendTextMessage={sendTextMessage}
-          events={events}
-          isSessionActive={isSessionActive}
-          isRecording={isRecording}
-          scenario1={setScenario1}
-          scenario2={setScenario2}
-          scenario3={setScenario3}
-          scenario4={setScenario4}
-          scenario5={setScenario5}
-        />
-      </ControlsSection>
+      {showSideBar ? (
+        <Sidebar $collapsed={sidebarCollapsed} onClick={handleSidebarClick}>
+          <SidebarTitle $collapsed={sidebarCollapsed}>Scenarios</SidebarTitle>
+          <SidebarButtons>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "1"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("1", setScenario1);
+              }}
+              title="Language Learning"
+            >
+              <IconWrapper>
+                <Languages size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>
+                Language Learning
+              </ScenarioButtonText>
+            </ScenarioButton>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "2"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("2", setScenario2);
+              }}
+              title="Sales"
+            >
+              <IconWrapper>
+                <User size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>Sales</ScenarioButtonText>
+            </ScenarioButton>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "3"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("3", setScenario3);
+              }}
+              title="Customer Service"
+            >
+              <IconWrapper>
+                <Headphones size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>
+                Customer Service
+              </ScenarioButtonText>
+            </ScenarioButton>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "4"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("4", setScenario4);
+              }}
+              title="Roleplay 1"
+            >
+              <IconWrapper>
+                <Users size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>Roleplay 1</ScenarioButtonText>
+            </ScenarioButton>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "5"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("5", setScenario5);
+              }}
+              title="Roleplay 2"
+            >
+              <IconWrapper>
+                <Users size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>Roleplay 2</ScenarioButtonText>
+            </ScenarioButton>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "6"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("6", setScenario6);
+              }}
+              title="Roleplay 3"
+            >
+              <IconWrapper>
+                <Users size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>Roleplay 3</ScenarioButtonText>
+            </ScenarioButton>
+            <ScenarioButton
+              data-scenario-button
+              $active={currentScenario === "7"}
+              $collapsed={sidebarCollapsed}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleScenarioClick("7", setScenario7);
+              }}
+              title="Roleplay 4"
+            >
+              <IconWrapper>
+                <Users size={22} />
+              </IconWrapper>
+              <ScenarioButtonText $collapsed={sidebarCollapsed}>Roleplay 4</ScenarioButtonText>
+            </ScenarioButton>
+          </SidebarButtons>
+        </Sidebar>
+      ) : null}
+      {showModal && (
+        <ModalOverlay>
+          <ModalBox>
+            <ModalTitle>Welcome to the scenario</ModalTitle>
+            <ModalButton onClick={handleStartSession}>Start Session</ModalButton>
+          </ModalBox>
+        </ModalOverlay>
+      )}
+      {isSessionActive && (
+        <FloatingResultsButton
+          onClick={stopSession}
+          disabled={uploadLoading.current !== false || respondingData.current === null}
+          style={{
+            opacity: uploadLoading.current !== false || respondingData.current === null ? 0.6 : 1,
+            pointerEvents:
+              uploadLoading.current !== false || respondingData.current === null ? "none" : "auto",
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <svg
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="feather feather-list"
+              viewBox="0 0 24 24"
+            >
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            Results
+          </span>
+        </FloatingResultsButton>
+      )}
     </>
   );
 }

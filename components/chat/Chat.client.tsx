@@ -152,42 +152,39 @@ export const Chat = ({ mainStateDispatch, chatState, settings }: ChatProps) => {
 
 const ChatWrapper = styled.div`
   box-sizing: border-box;
-
   position: absolute;
   bottom: 0;
   right: 0;
-
   width: 300px;
-
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
   overflow: auto;
   justify-content: flex-end;
-
   max-height: 100vh;
-
-  // background-color: rgba(255, 255, 255, 0.8);
-
   z-index: 1000;
 
-  ${media.small`
+  @media (max-width: 768px) {
     width: 100%;
-  `}
+    padding: 0.25rem;
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
 `;
 
 const ChatMessagesWrapper = styled.div`
   margin-bottom: 0.5rem;
   overflow: auto;
-
   padding: 5px 10px;
   border-radius: 12px;
-
   background-color: rgba(0, 0, 0, 0.1);
 
-  ${media.small`
-    max-height: 25vh;
-  `}
+  @media (max-width: 768px) {
+    max-height: 30vh;
+    margin-bottom: 0.25rem;
+    padding: 4px 8px;
+  }
 `;
 
 const TextareaWrapper = styled.div`
@@ -196,41 +193,74 @@ const TextareaWrapper = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+
+  @media (max-width: 768px) {
+    padding: 6px;
+  }
 `;
 
 const Textarea = styled.textarea`
-  box-sizing: border-box;
-  resize: none;
-  height: 75px;
   width: 100%;
-  outline: none;
-  background-color: white;
-  padding: 10px 50px 10px 10px;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  resize: none;
+  font-size: 14px;
+  line-height: 1.4;
 
-  border-radius: 12px;
+  @media (max-width: 768px) {
+    min-height: 36px;
+    max-height: 100px;
+    font-size: 16px; // Better for mobile input
+    padding: 6px;
+  }
 
-  ${media.small`
-    height: 60px;
-  `}
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
 `;
 
 const ChatButtonWrapper = styled.div`
   position: absolute;
-  right: 18px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    right: 6px;
+    bottom: 6px;
+  }
 `;
 
-const ChatButton = styled.button<{ disabled: boolean }>`
-  cursor: pointer;
+const ChatButton = styled.button`
+  background: none;
   border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
 
-  background-color: #3b82f6;
-  // background-color: ${(props) => (props.disabled ? "gray" : "#3b82f6")};
+  @media (max-width: 768px) {
+    padding: 6px;
+  }
 
-  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  &:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 
-  color: #ffffff;
-  border-radius: 6px;
-
-  height: 33px;
-  width: 33px;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
