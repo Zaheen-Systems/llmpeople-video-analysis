@@ -44,15 +44,21 @@ export const useVideoRecording = (): VideoRecordingHook => {
       currentRecorder.requestData();
 
       // Wait a bit longer for the data to be available
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       const mimeType = currentRecorder.mimeType || "video/webm";
       const oneMinuteBlob = new Blob(oneMinuteChunksRef.current, { type: mimeType });
 
-      console.log("Timed blob size:", oneMinuteBlob.size, "chunks:", oneMinuteChunksRef.current.length);
+      console.log(
+        "Timed blob size:",
+        oneMinuteBlob.size,
+        "chunks:",
+        oneMinuteChunksRef.current.length
+      );
 
       // Only upload if we have substantial data
-      if (oneMinuteBlob.size > 50000) { // Increased threshold to 50KB
+      if (oneMinuteBlob.size > 50000) {
+        // Increased threshold to 50KB
         const scenarioToUse = scenarioRef.current;
         console.log("Uploading video with scenario:", scenarioToUse);
         await uploadVideo("responding", oneMinuteBlob, scenarioToUse);
@@ -80,7 +86,7 @@ export const useVideoRecording = (): VideoRecordingHook => {
         video: {
           width: { ideal: 640 },
           height: { ideal: 480 },
-          frameRate: { ideal: 15 }
+          frameRate: { ideal: 15 },
         },
         audio: true,
       });
@@ -91,7 +97,7 @@ export const useVideoRecording = (): VideoRecordingHook => {
         videoRef.current.style.position = "absolute";
         videoRef.current.style.top = "10px";
         videoRef.current.style.left = "10px";
-        videoRef.current.style.width = "320px";
+        videoRef.current.style.width = "20%";
         videoRef.current.style.zIndex = "100";
         videoRef.current.volume = 0;
         document.body.appendChild(videoRef.current);
@@ -111,7 +117,11 @@ export const useVideoRecording = (): VideoRecordingHook => {
 
       // Set up timeout for recording duration
       const uploadDuration = RECORDING_DURATION;
-      console.log(`Setting recording duration to ${uploadDuration / 1000} seconds for scenario ${scenarioOverride}`);
+      console.log(
+        `Setting recording duration to ${
+          uploadDuration / 1000
+        } seconds for scenario ${scenarioOverride}`
+      );
 
       const uploadTimeout = setTimeout(() => {
         if (!hasUploadedOneMinute.current) {
