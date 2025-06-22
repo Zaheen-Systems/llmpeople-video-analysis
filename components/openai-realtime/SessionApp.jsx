@@ -1,5 +1,5 @@
 import { useGameContext } from "@/components/GameContextProvider";
-import { Scenario1, Scenario2, scenario3, scenario4, scenario5 } from "@/lib/constants";
+import { Scenario1, Scenario2, scenario3, scenario4, scenario5, scenario6 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { Headphones, Languages, User, Users } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -216,7 +216,6 @@ const FloatingResultsButton = styled.button`
 `;
 
 // Add placeholder scenario constants for 6 and 7
-const scenario6 = "Roleplay 3 instructions.";
 const scenario7 = "Roleplay 4 instructions.";
 
 export default function SessionApp({ mainStateDispatch }) {
