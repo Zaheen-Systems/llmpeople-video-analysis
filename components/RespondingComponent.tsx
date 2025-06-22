@@ -176,20 +176,31 @@ interface BenRespondingData {
   suggestionsForImprovement: string;
 }
 
-interface RubricEvaluation {
-  rubricEvaluation: BenRubricEvaluation | AdamRubricEvaluation;
+interface BlakeRubricEvaluation {
+  clarityofcommunication: { score: number; explanation: string };
+  confidenceandprofessionalism: { score: number; explanation: string };
+  relevanceofresponses: { score: number; explanation: string };
+  demonstrationofrequiredtraits: { score: number; explanation: string };
+  abilitytoaskandanswerquestionsprofessionally: { score: number; explanation: string };
 }
 
-// Update the main interface to handle both types
+interface BlakeRespondingData {
+  rubricEvaluation: BlakeRubricEvaluation;
+  totalScore: number;
+  scoreInterpretation: string;
+  suggestionsForImprovement: string;
+}
+
+// Update the main interface to handle all types
 interface RespondingComponentProps {
-  respondingData: RespondingData | AdamRespondingData | BenRespondingData;
+  respondingData: RespondingData | AdamRespondingData | BenRespondingData | BlakeRespondingData;
   scenario?: string;
 }
 
 const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingData, scenario }) => {
   // Add debugging to track when this component renders
-  console.log('RespondingComponent rendering with data:', respondingData);
-  console.log('RespondingComponent rendering with scenario:', scenario);
+  console.log("RespondingComponent rendering with data:", respondingData);
+  console.log("RespondingComponent rendering with scenario:", scenario);
 
   const handleTryAgain = () => {
     window.location.reload();
@@ -212,7 +223,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
   const renderRubricItem = (label: string, item: { score: number; explanation: string }) => (
     <ListItem>
       <StrongText>{label}:</StrongText> {renderStars(item.score)}
-      <div style={{ marginLeft: '16px', fontSize: '0.9rem', marginTop: '4px' }}>
+      <div style={{ marginLeft: "16px", fontSize: "0.9rem", marginTop: "4px" }}>
         {item.explanation}
       </div>
     </ListItem>
@@ -220,31 +231,51 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
 
   // Type guard to check if it's Adam scenario data
   const isAdamData = (data: any): data is AdamRespondingData => {
-    return 'rubricEvaluation' in data &&
+    return (
+      "rubricEvaluation" in data &&
       data.rubricEvaluation !== undefined &&
-      'empathyAndEmotionalSensitivity' in data.rubricEvaluation;
+      "empathyAndEmotionalSensitivity" in data.rubricEvaluation
+    );
   };
 
   // Type guard to check if it's Ben scenario data (scenario 5)
   const isBenData = (data: any): data is BenRespondingData => {
-    return 'rubricEvaluation' in data &&
+    return (
+      "rubricEvaluation" in data &&
       data.rubricEvaluation !== undefined &&
-      'feedbackonworkperformance' in data.rubricEvaluation;
+      "feedbackonworkperformance" in data.rubricEvaluation
+    );
+  };
+
+  // Type guard to check if it's Blake scenario data (scenario 6)
+  const isBlakeData = (data: any): data is BlakeRespondingData => {
+    return (
+      "rubricEvaluation" in data &&
+      data.rubricEvaluation !== undefined &&
+      "clarityofcommunication" in data.rubricEvaluation
+    );
   };
 
   // Type guard to check if it's regular scenario data
   const isRegularData = (data: any): data is RespondingData => {
-    return 'facialExpressions' in data &&
-      'soundToneOfVoice' in data &&
-      'textChoiceOfWords' in data &&
+    return (
+      "facialExpressions" in data &&
+      "soundToneOfVoice" in data &&
+      "textChoiceOfWords" in data &&
       data.facialExpressions !== undefined &&
       data.soundToneOfVoice !== undefined &&
-      data.textChoiceOfWords !== undefined;
+      data.textChoiceOfWords !== undefined
+    );
   };
 
   // Add error handling for malformed data
-  if (!isAdamData(respondingData) && !isBenData(respondingData) && !isRegularData(respondingData)) {
-    console.error('Invalid respondingData structure:', respondingData);
+  if (
+    !isAdamData(respondingData) &&
+    !isBenData(respondingData) &&
+    !isBlakeData(respondingData) &&
+    !isRegularData(respondingData)
+  ) {
+    console.error("Invalid respondingData structure:", respondingData);
     return (
       <Container>
         <Title>Error: Invalid Data Structure</Title>
@@ -252,7 +283,9 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
           <FeedbackText>
             The response data is not in the expected format. Please try again.
           </FeedbackText>
-          <pre style={{ fontSize: '12px', background: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
+          <pre
+            style={{ fontSize: "12px", background: "#f5f5f5", padding: "10px", overflow: "auto" }}
+          >
             {JSON.stringify(respondingData, null, 2)}
           </pre>
         </Section>
@@ -275,10 +308,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
               "Empathy and Emotional Sensitivity",
               respondingData.rubricEvaluation.empathyAndEmotionalSensitivity
             )}
-            {renderRubricItem(
-              "Active Listening",
-              respondingData.rubricEvaluation.activeListening
-            )}
+            {renderRubricItem("Active Listening", respondingData.rubricEvaluation.activeListening)}
             {renderRubricItem(
               "Creating Psychological Safety",
               respondingData.rubricEvaluation.creatingPsychologicalSafety
@@ -296,7 +326,8 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
 
         {/* Total Score */}
         <Section>
-          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/25 ({respondingData.scoreInterpretation})
+          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/25 (
+          {respondingData.scoreInterpretation})
         </Section>
 
         {/* Suggestions */}
@@ -335,10 +366,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
               "Empathy and Accountability",
               respondingData.rubricEvaluation.empathyandaccountability
             )}
-            {renderRubricItem(
-              "Career Guidance",
-              respondingData.rubricEvaluation.careerguidance
-            )}
+            {renderRubricItem("Career Guidance", respondingData.rubricEvaluation.careerguidance)}
             {renderRubricItem(
               "Emotional Sensitivity and Conversation Management",
               respondingData.rubricEvaluation.emotionalsensitivityandconversationmanagement
@@ -351,10 +379,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
               "Facial Expressions",
               respondingData.rubricEvaluation.facialexpressions
             )}
-            {renderRubricItem(
-              "Tone of Voice",
-              respondingData.rubricEvaluation.toneofvoice
-            )}
+            {renderRubricItem("Tone of Voice", respondingData.rubricEvaluation.toneofvoice)}
             {renderRubricItem(
               "Body Language and Posture",
               respondingData.rubricEvaluation.bodylanguageandposture
@@ -368,7 +393,61 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
 
         {/* Total Score */}
         <Section>
-          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/50 ({respondingData.scoreInterpretation})
+          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/50 (
+          {respondingData.scoreInterpretation})
+        </Section>
+
+        {/* Suggestions */}
+        <Section>
+          <FeedbackText>
+            <StrongText>Suggestions for Improvement:</StrongText>{" "}
+            {respondingData.suggestionsForImprovement}
+          </FeedbackText>
+        </Section>
+
+        {/* Try Again Button */}
+        <TryAgainButton onClick={handleTryAgain}>Try Again</TryAgainButton>
+      </Container>
+    );
+  }
+
+  if (isBlakeData(respondingData)) {
+    // Render Blake scenario (scenario 6) layout
+    return (
+      <Container>
+        <Title>Here is how you did</Title>
+
+        {/* Rubric Evaluation */}
+        <Section>
+          <SectionTitle>Evaluation Rubric</SectionTitle>
+          <List>
+            {renderRubricItem(
+              "Clarity of Communication",
+              respondingData.rubricEvaluation.clarityofcommunication
+            )}
+            {renderRubricItem(
+              "Confidence and Professionalism",
+              respondingData.rubricEvaluation.confidenceandprofessionalism
+            )}
+            {renderRubricItem(
+              "Relevance of Responses",
+              respondingData.rubricEvaluation.relevanceofresponses
+            )}
+            {renderRubricItem(
+              "Demonstration of Required Traits",
+              respondingData.rubricEvaluation.demonstrationofrequiredtraits
+            )}
+            {renderRubricItem(
+              "Ability to Ask and Answer Questions Professionally",
+              respondingData.rubricEvaluation.abilitytoaskandanswerquestionsprofessionally
+            )}
+          </List>
+        </Section>
+
+        {/* Total Score */}
+        <Section>
+          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/25 (
+          {respondingData.scoreInterpretation})
         </Section>
 
         {/* Suggestions */}
