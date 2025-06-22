@@ -344,3 +344,45 @@ export const models = {
     positionOffset: v3(0, 0.03, 0),
   },
 } as const;
+
+export const scenarioDescriptions = {
+  1: {
+    title: "Language Learning",
+    description:
+      "You are about to interact with an AI that will coach you on the English language. Please sit in a quiet place (external noise is picked up easily). Please have a conversation just like you would with a real-life coach.",
+  },
+  2: {
+    title: "Sales",
+    description:
+      "You are about to interact with an AI that will coach you on your Selling Skills. Please sit in a quiet place (external noise is picked up easily). Please have a conversation just like you would with a real-life coach.",
+  },
+  3: {
+    title: "Customer Service",
+    description:
+      "You are about to interact with an AI that will coach you on your Customer Service Skills. Please sit in a quiet place (external noise is picked up easily). Please have a conversation just like you would with a real-life coach.",
+  },
+  4: {
+    title: "Role Play 1",
+    description: `Your role play partner is an AI. Please practice this scenario just like you would with a real person.\n
+Situation: You have noticed that a colleague is feeling overwhelmed. An important part of your job is to assure your colleagues of support and maintain a positive work culture. You come across the colleague and start a conversation.`,
+  },
+  5: {
+    title: "Role Play 2",
+    description: `Your role play partner is an AI. Please practice this scenario just like you would with a real person.\n 
+
+Situation: You are a middle manager and have a small team. ·You called for a scheduled career development meeting with Ben, aged 28. He has been working in your team for over a year. When he first joined, he was performing fine – not exceptional but would meet deadlines. Recently though, he has been lapsing on deadlines and not been very accountable of late. The purpose is to check in on his thoughts towards his work, and for a time of feedback, both for you to him, and for him to you.`,
+  },
+  6: {
+    title: "Role Play 3",
+    description: `In this interview practice simulation, you will be interviewed by an AI.\n  
+
+Situation: You are applying for a part-time server role at Evolve, a downtown casual and fine-dining restaurant. The interviewer will ask you questions. Please respond just like you would to a real person.
+`,
+  },
+  7: {
+    title: "Role Play 4",
+    description: `Your role play partner is an AI. Please practice this scenario just like you would with a real person.\n 
+
+Situation: You are a call center agent working for the Public Service Division. A citizen has called the government hotline to check on the status of their financial assistance application under a national support scheme. They submitted the application six weeks ago and have not received any update. They are frustrated and anxious about their financial situation. You have to handle the emotional tone of the call while offering clarity, reassurance, and professional service.`,
+  },
+} as const;

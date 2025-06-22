@@ -1,5 +1,13 @@
 import { useGameContext } from "@/components/GameContextProvider";
-import { Scenario1, Scenario2, scenario3, scenario4, scenario5, scenario6 } from "@/lib/constants";
+import {
+  Scenario1,
+  Scenario2,
+  scenario3,
+  scenario4,
+  scenario5,
+  scenario6,
+  scenarioDescriptions,
+} from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
 import { Headphones, Languages, User, Users } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -35,7 +43,7 @@ const ModalBox = styled.div`
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   padding: 36px 32px 28px 32px;
   min-width: 320px;
-  max-width: 90vw;
+  max-width: 60vw;
   text-align: center;
   @media (max-width: 600px) {
     min-width: 90vw;
@@ -47,6 +55,12 @@ const ModalTitle = styled.div`
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 18px;
+`;
+const ModalDescription = styled.div`
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 16px;
+  white-space: pre-line;
 `;
 const ModalButton = styled.button`
   background: #22c55e;
@@ -221,6 +235,7 @@ const scenario7 = "Roleplay 4 instructions.";
 export default function SessionApp({ mainStateDispatch }) {
   const [systemMessage, setSystemMessage] = useState(Scenario1);
   const [currentScenario, setCurrentScenario] = useState("1");
+  const currentScenarioRef = useRef("1");
   const [events, setEvents] = useState([]);
   const [dataChannel, setDataChannel] = useState(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -607,6 +622,7 @@ export default function SessionApp({ mainStateDispatch }) {
   }
 
   function handleScenarioClick(scenarioNumber, setScenarioFn) {
+    currentScenarioRef.current = scenarioNumber;
     setPendingScenario({ scenarioNumber, setScenarioFn });
     setShowModal(true);
   }
@@ -741,7 +757,10 @@ export default function SessionApp({ mainStateDispatch }) {
       {showModal && (
         <ModalOverlay>
           <ModalBox>
-            <ModalTitle>Welcome to the scenario</ModalTitle>
+            <ModalTitle>{scenarioDescriptions[currentScenarioRef.current].title}</ModalTitle>
+            <ModalDescription>
+              {scenarioDescriptions[currentScenarioRef.current].description}
+            </ModalDescription>
             <ModalButton onClick={handleStartSession}>Start Session</ModalButton>
           </ModalBox>
         </ModalOverlay>
