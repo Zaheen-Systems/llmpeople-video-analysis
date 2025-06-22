@@ -602,6 +602,13 @@ export default function SessionApp({ mainStateDispatch }) {
           );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 5 session ready with modified system message");
+        } else if (currentScenario === "6") {
+          sendSystemMessage(
+            systemMessage +
+              "\n\nIMPORTANT: Start the conversation by saying exactly 'Hi, thanks for coming in today... How is it going?' in a professional tone. Then wait for the manager's response."
+          );
+          sendTextMessage("Begin the roleplay now.");
+          console.log("Scenario 6 session ready with modified system message");
         } else {
           // For scenarios 1-3, send system message and auto-start (mic stays muted until avatar finishes)
           sendSystemMessage(systemMessage);
