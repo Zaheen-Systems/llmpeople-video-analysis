@@ -164,7 +164,7 @@ const Game: React.FC<GameProps> = ({ hasGoogleApiKey }) => {
     </div>
   );
 };
-
+//
 const TopCornerButtons = styled.div`
   position: fixed;
   top: 12px;
