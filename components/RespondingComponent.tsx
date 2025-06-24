@@ -191,9 +191,24 @@ interface BlakeRespondingData {
   suggestionsForImprovement: string;
 }
 
+interface JordanRubricEvaluation {
+  empathyandactivelistening: { score: number; explanation: string };
+  composureunderpressure: { score: number; explanation: string };
+  clarityofcommunication: { score: number; explanation: string };
+  takingownershipandproblemsolving: { score: number; explanation: string };
+  professionalismandtone: { score: number; explanation: string };
+}
+
+interface JordanRespondingData {
+  rubricEvaluation: JordanRubricEvaluation;
+  totalScore: number;
+  scoreInterpretation: string;
+  suggestionsForImprovement: string;
+}
+
 // Update the main interface to handle all types
 interface RespondingComponentProps {
-  respondingData: RespondingData | AdamRespondingData | BenRespondingData | BlakeRespondingData;
+  respondingData: RespondingData | AdamRespondingData | BenRespondingData | BlakeRespondingData | JordanRespondingData;
   scenario?: string;
 }
 
@@ -252,7 +267,16 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
     return (
       "rubricEvaluation" in data &&
       data.rubricEvaluation !== undefined &&
-      "clarityofcommunication" in data.rubricEvaluation
+      "abilitytoaskandanswerquestionsprofessionally" in data.rubricEvaluation
+    );
+  };
+
+  // Type guard to check if it's Jordan scenario data (scenario 7)
+  const isJordanData = (data: any): data is JordanRespondingData => {
+    return (
+      "rubricEvaluation" in data &&
+      data.rubricEvaluation !== undefined &&
+      "empathyandactivelistening" in data.rubricEvaluation
     );
   };
 
@@ -273,6 +297,7 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
     !isAdamData(respondingData) &&
     !isBenData(respondingData) &&
     !isBlakeData(respondingData) &&
+    !isJordanData(respondingData) &&
     !isRegularData(respondingData)
   ) {
     console.error("Invalid respondingData structure:", respondingData);
@@ -440,6 +465,59 @@ const RespondingComponent: React.FC<RespondingComponentProps> = ({ respondingDat
             {renderRubricItem(
               "Ability to Ask and Answer Questions Professionally",
               respondingData.rubricEvaluation.abilitytoaskandanswerquestionsprofessionally
+            )}
+          </List>
+        </Section>
+
+        {/* Total Score */}
+        <Section>
+          <StrongText>Total Score:</StrongText> {respondingData.totalScore}/25 (
+          {respondingData.scoreInterpretation})
+        </Section>
+
+        {/* Suggestions */}
+        <Section>
+          <FeedbackText>
+            <StrongText>Suggestions for Improvement:</StrongText>{" "}
+            {respondingData.suggestionsForImprovement}
+          </FeedbackText>
+        </Section>
+
+        {/* Try Again Button */}
+        <TryAgainButton onClick={handleTryAgain}>Try Again</TryAgainButton>
+      </Container>
+    );
+  }
+
+  if (isJordanData(respondingData)) {
+    // Render Jordan scenario (scenario 7) layout
+    return (
+      <Container>
+        <Title>Here is how you did</Title>
+
+        {/* Rubric Evaluation */}
+        <Section>
+          <SectionTitle>Evaluation Rubric</SectionTitle>
+          <List>
+            {renderRubricItem(
+              "Empathy and Active Listening",
+              respondingData.rubricEvaluation.empathyandactivelistening
+            )}
+            {renderRubricItem(
+              "Composure Under Pressure",
+              respondingData.rubricEvaluation.composureunderpressure
+            )}
+            {renderRubricItem(
+              "Clarity of Communication",
+              respondingData.rubricEvaluation.clarityofcommunication
+            )}
+            {renderRubricItem(
+              "Taking Ownership and Problem Solving",
+              respondingData.rubricEvaluation.takingownershipandproblemsolving
+            )}
+            {renderRubricItem(
+              "Professionalism and Tone",
+              respondingData.rubricEvaluation.professionalismandtone
             )}
           </List>
         </Section>
