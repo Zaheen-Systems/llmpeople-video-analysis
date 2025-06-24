@@ -589,7 +589,7 @@ export default function SessionApp({ mainStateDispatch }) {
           // For scenario 4, send the role rule and unmute after audio completes
           sendSystemMessage(
             systemMessage +
-              "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response."
+            "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response."
           );
           sendTextMessage("Begin the roleplay now.");
           // Note: microphone will be unmuted after the introduction audio completes
@@ -598,17 +598,24 @@ export default function SessionApp({ mainStateDispatch }) {
           // For scenario 5, modify system message to include opening line
           sendSystemMessage(
             systemMessage +
-              "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response."
+            "\n\nIMPORTANT: Start the conversation by saying exactly 'Hey there boss! How is it going?' with a little tired or low on energy, reflecting your current overwhelmed state. Then wait for the manager's response."
           );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 5 session ready with modified system message");
         } else if (currentScenario === "6") {
           sendSystemMessage(
             systemMessage +
-              "\n\nIMPORTANT: Start the conversation by saying exactly 'Hi, thanks for coming in today... How is it going?' in a professional tone. Then wait for the manager's response."
+            "\n\nIMPORTANT: Start the conversation by saying exactly 'Hi, thanks for coming in today... How is it going?' in a professional tone. Then wait for the manager's response."
           );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 6 session ready with modified system message");
+        } else if (currentScenario === "7") {
+          sendSystemMessage(
+            systemMessage +
+            "\n\nIMPORTANT: Start the conversation by saying exactly 'Finally, someone picked up! Look, I submitted my financial assistance application six weeks ago and I haven't heard a single word back. What's going on with my case?' in a frustrated tone. Then wait for the user's response."
+          );
+          sendTextMessage("Begin the roleplay now.");
+          console.log("Scenario 7 session ready with modified system message");
         } else {
           // For scenarios 1-3, send system message and auto-start (mic stays muted until avatar finishes)
           sendSystemMessage(systemMessage);
