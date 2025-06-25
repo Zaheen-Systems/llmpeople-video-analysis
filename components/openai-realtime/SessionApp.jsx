@@ -6,6 +6,7 @@ import {
   scenario4,
   scenario5,
   scenario6,
+  scenario7,
   scenarioDescriptions,
 } from "@/lib/constants";
 import { useVideoRecording } from "@/lib/hooks/useVideoRecording";
@@ -228,9 +229,6 @@ const FloatingResultsButton = styled.button`
     bottom: 8px;
   }
 `;
-
-// Add placeholder scenario constants for 6 and 7
-const scenario7 = "Roleplay 4 instructions.";
 
 export default function SessionApp({ mainStateDispatch }) {
   const [systemMessage, setSystemMessage] = useState(Scenario1);
@@ -594,6 +592,7 @@ export default function SessionApp({ mainStateDispatch }) {
           sendTextMessage("Begin the roleplay now.");
           // Note: microphone will be unmuted after the introduction audio completes
           console.log("Scenario 4 session ready, waiting for introduction audio to complete...");
+          console.log("System message: ", systemMessage);
         } else if (currentScenario === "5") {
           // For scenario 5, modify system message to include opening line
           sendSystemMessage(
@@ -602,6 +601,7 @@ export default function SessionApp({ mainStateDispatch }) {
           );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 5 session ready with modified system message");
+          console.log("System message: ", systemMessage);
         } else if (currentScenario === "6") {
           sendSystemMessage(
             systemMessage +
@@ -609,6 +609,7 @@ export default function SessionApp({ mainStateDispatch }) {
           );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 6 session ready with modified system message");
+          console.log("System message: ", systemMessage);
         } else if (currentScenario === "7") {
           sendSystemMessage(
             systemMessage +
@@ -616,6 +617,7 @@ export default function SessionApp({ mainStateDispatch }) {
           );
           sendTextMessage("Begin the roleplay now.");
           console.log("Scenario 7 session ready with modified system message");
+          console.log("System message: ", systemMessage);
         } else {
           // For scenarios 1-3, send system message and auto-start (mic stays muted until avatar finishes)
           sendSystemMessage(systemMessage);
